@@ -1,10 +1,10 @@
-﻿# SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+# SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
 | :--- | :--- |
 | **Loại tài liệu** | Software Requirements Specification (SRS) |
-| **Phiên bản** | v1.0.0 (Enterprise Standard) |
+| **Phiên bản** | v1.1.0 (Enterprise Standard) |
 | **Tác giả** | Engineering Team (SA & Lead Backend) |
 | **Trạng thái** | Đã phê duyệt (Approved) |
 
@@ -44,6 +44,21 @@ Khi người dùng thực hiện review, nếu họ chọn xác thực vị trí
 2.  Tính khoảng cách địa lý giữa tọa độ người dùng và tọa độ quán ăn trên hệ thống bằng công thức **Haversine**.
 3.  **Điều kiện hợp lệ:** Khoảng cách phải nhỏ hơn hoặc bằng **200 mét**. Nếu vượt quá, review sẽ không được duyệt nhãn "Verified Review".
 
+### 2.3. Bản đồ Ẩm thực Tương tác (Interactive Food Map Module)
+
+#### SRS-MAP-001: Lấy tọa độ thời gian thực
+*   Hệ thống sử dụng HTML5 Geolocation API để yêu cầu quyền lấy tọa độ hiện tại của thiết bị người dùng (độ chính xác yêu cầu < 50m). Tọa độ này được gửi lên backend để truy vấn các quán ăn lân cận trong bán kính mặc định 5km.
+
+#### SRS-MAP-002: Phân loại Ghim bản đồ (Smart Pins Logic)
+*   Khi render bản đồ, Backend trả về thêm thông tin trạng thái mối quan hệ của User hiện tại với từng quán ăn để Frontend thay đổi màu sắc và icon của ghim (pins):
+    *   **STATUS_NOT_VISITED (Màu xám):** Không có bản ghi review verified nào của User này tại quán.
+    *   **STATUS_VISITED (Màu xanh lá có Checkmark):** Có ít nhất một bản ghi review verified của User này tại quán.
+    *   **STATUS_FAVORITE (Màu đỏ có Trái Tim):** Quán nằm trong danh sách yêu thích của User.
+
+#### SRS-MAP-003: Truy vấn không gian theo Bounding Box
+*   Mỗi khi người dùng di chuyển hoặc phóng to/thu nhỏ bản đồ (drag/zoom event), Frontend sẽ lấy tọa độ 4 góc của khung hình (North-East, South-West coordinates) gửi lên API.
+*   Backend sử dụng câu lệnh SQL PostGIS (`ST_MakeEnvelope`) kết hợp chỉ mục GiST để chỉ quét và trả về danh sách các quán ăn nằm bên trong khung nhìn hiển thị hiện tại, tối ưu tốc độ render bản đồ.
+
 ---
 
 ## 3. YÊU CẦU PHI CHỨC NĂNG (NON-FUNCTIONAL REQUIREMENTS)
@@ -55,4 +70,3 @@ Khi người dùng thực hiện review, nếu họ chọn xác thực vị trí
 ### 3.2. Hiệu năng & Khả năng Mở rộng (Performance & Scalability)
 *   **Tốc độ phản hồi (Response Time):** Thời gian tải trang chủ và thực hiện các câu truy vấn tìm kiếm quán ăn phải dưới **1.0 giây** trong điều kiện mạng ổn định.
 *   **Khả năng chịu tải (Concurrent Users):** Hệ thống được thiết kế để chịu tải tối thiểu **1,000 kết nối đồng thời** trên mỗi giây (1,000 TPS) không gây suy giảm hiệu năng.
-
