@@ -74,5 +74,5 @@ Chúng tôi phân loại tính năng theo mức độ ưu tiên:
 ## 3. CHỈ SỐ ĐO LƯỜNG THÀNH CÔNG (SUCCESS METRICS - KPIS)
 
 *   **Tỷ lệ Giữ chân Người dùng (Retention Rate):** Đạt tối thiểu 35% user quay lại website trong vòng 30 ngày (D30 Retention).
-*   **Chỉ số Hài lòng của Khách ăn (User CSAT):** Điểm đánh giá mức độ tin cậy của website đạt từ 4.5/5.0 trở lên qua các khảo sát định kỳ.
+*   **Chỉ số Hài lòng của Khách ăn (User CSAT):** Điểm đánh giá mức độ tin cậy của website đạt từ 3.6/5.0 trở lên qua các khảo sát định kỳ.
 *   **Tốc độ Phê duyệt của Admin:** Thời gian duyệt hồ sơ quán ăn đăng ký mới trung bình dưới 12 giờ làm việc.
