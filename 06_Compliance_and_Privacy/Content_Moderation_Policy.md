@@ -1,4 +1,4 @@
-# ⚖️ CONTENT MODERATION & USER CONDUCT POLICY
+﻿# CONTENT MODERATION & USER CONDUCT POLICY
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -67,3 +67,4 @@ Chúng tôi áp dụng quy trình kiểm duyệt kết hợp giữa công nghệ
     *   *Phạt lần 1:* Hủy bỏ toàn bộ các review seeding ảo. Gửi thư cảnh cáo.
     *   *Phạt lần 2:* Treo huy hiệu màu đỏ **"Cảnh báo: Có dấu hiệu thao túng đánh giá"** nổi bật trên trang quán ăn trong **30 ngày**.
     *   *Phạt lần 3:* Khóa trang thông tin quán vĩnh viễn, ẩn quán khỏi bản đồ tìm kiếm của TrustBite.
+

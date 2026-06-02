@@ -1,4 +1,4 @@
-# 🗄️ DETAILED POSTGRESQL SCHEMA SPECIFICATION
+﻿# DETAILED POSTGRESQL SCHEMA SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -49,3 +49,4 @@ Mỗi khi có một review mới được đăng, hoặc một review bị xóa/
 
 ### 3.2. Tự động cập nhật Thời gian thay đổi (Updated At)
 *   Tự động cập nhật cột `updated_at` của bất kỳ hàng nào khi có sự thay đổi dữ liệu mà backend không cần truyền giá trị thời gian lên.
+

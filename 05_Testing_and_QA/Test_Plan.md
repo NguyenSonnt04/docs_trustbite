@@ -1,4 +1,4 @@
-# 🧪 SYSTEM TEST PLAN & UAT SPECIFICATION
+﻿# SYSTEM TEST PLAN & UAT SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -77,3 +77,4 @@ Tài liệu này xác định kế hoạch kiểm thử toàn diện hệ thốn
     *   Tổng EXP của User tăng lên **140 EXP** (>100 EXP).
     *   Hệ thống tự động chạy hoạt ảnh chúc mừng và cập nhật cấp bậc của User từ **NEWBIE** lên **APPRENTICE (Thực Thần Tập Sự)**.
     *   Quyền hạn của User được mở rộng (Có thể bấm nút "Hữu ích" cho bài viết của người khác).
+

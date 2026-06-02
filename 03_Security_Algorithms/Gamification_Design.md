@@ -1,4 +1,4 @@
-# 🎮 GAMIFICATION DESIGN SPECIFICATIONS
+﻿# GAMIFICATION DESIGN SPECIFICATIONS
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -48,23 +48,24 @@ Huy hiệu là những danh hiệu đặc biệt được gắn vào hồ sơ c�
 |               Rank: NGƯỜI SÀNH ĂN  (Level 3)                      |
 |                                                                   |
 |   Huy hiệu đạt được:                                              |
-|   [👑 Receipt Master] [🦉 Cú Đêm] [🚀 Người Khai Phá]              |
+|   [Receipt Master] [Cú Đêm] [Người Khai Phá]              |
 +-------------------------------------------------------------------+
 ```
 
 ### Chi tiết các Huy hiệu chính:
 
-#### 1. Huy hiệu: 👑 Receipt Master (Chuyên Gia Xác Minh)
+#### 1. Huy hiệu: Receipt Master (Chuyên Gia Xác Minh)
 *   **Mô tả:** Dành cho những người dùng luôn luôn có ý thức chứng minh trải nghiệm bằng hóa đơn thật.
 *   **Điều kiện mở khóa:** Đạt **10 bài review liên tiếp** đều được xác minh hóa đơn (Verified Review) thành công.
 *   **Hiệu ứng hiển thị:** Huy hiệu màu vàng hổ phách viền phát sáng, hiển thị ngay cạnh tên hiển thị.
 
-#### 2. Huy hiệu: 🚀 Người Khai Phá (The Explorer)
+#### 2. Huy hiệu: Người Khai Phá (The Explorer)
 *   **Mô tả:** Tôn vinh những người đi đầu trong việc tìm kiếm các địa điểm ăn uống mới chưa ai biết tới.
 *   **Điều kiện mở khóa:** Viết **review đầu tiên** (được phê duyệt thành công) cho **5 quán ăn mới** vừa xuất hiện trên hệ thống.
 *   **Hiệu ứng hiển thị:** Huy hiệu màu cam đỏ gradient hình tên lửa đang cất cánh.
 
-#### 3. Huy hiệu: 🦉 Cú Đêm (The Night Owl)
+#### 3. Huy hiệu: Cú Đêm (The Night Owl)
 *   **Mô tả:** Dành cho những chuyên gia ẩm thực chuyên đi ăn đêm.
 *   **Điều kiện mở khóa:** Có tối thiểu **10 bài review** được đăng trong khung giờ từ **22:00 tối đến 04:00 sáng**.
 *   **Hiệu ứng hiển thị:** Huy hiệu màu tím huyền bí hình chú chim cú dưới trăng khuyết.
+

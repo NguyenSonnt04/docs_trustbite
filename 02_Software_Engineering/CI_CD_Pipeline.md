@@ -1,4 +1,4 @@
-# 🚀 CI/CD PIPELINE & DEPLOYMENT PLAYBOOK
+﻿# CI/CD PIPELINE & DEPLOYMENT PLAYBOOK
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -70,7 +70,7 @@ Khi code được merge thành công vào nhánh chính:
     1.  Dựng cụm Container mới (Green) song song cụm Container cũ đang chạy (Blue).
     2.  Tiến hành **Health Check (Kiểm tra trạng thái)** cụm mới.
     3.  Nếu cụm mới phản hồi ổn định (HTTP 200 OK), AWS API Gateway sẽ tự động chuyển hướng dần 100% lưu lượng truy cập sang cụm mới (Green) và tắt cụm cũ (Blue).
-    4.  👉 *Tác dụng:* **Zero-Downtime Deployment** - Người dùng hoàn toàn không bị gián đoạn hay mất kết nối khi hệ thống nâng cấp phiên bản mới.
+    4.  *Tác dụng:* **Zero-Downtime Deployment** - Người dùng hoàn toàn không bị gián đoạn hay mất kết nối khi hệ thống nâng cấp phiên bản mới.
 
 ---
 
@@ -79,3 +79,4 @@ Khi code được merge thành công vào nhánh chính:
 Để đảm bảo môi trường phát triển (Dev), kiểm thử (Staging) và chạy thật (Production) giống nhau 100%, toàn bộ hạ tầng AWS của TrustBite được định nghĩa bằng mã nguồn **Terraform** hoặc **AWS CloudFormation**. 
 
 Mọi thay đổi về phần cứng (tăng cấu hình RDS, thêm RAM cho container) đều phải tạo Pull Request duyệt qua mã IaC, không thao tác thủ công bằng tay trên giao diện web của AWS.
+

@@ -1,4 +1,4 @@
-# 🏛️ PROJECT CHARTER (HIẾN CHƯƠNG DỰ ÁN)
+﻿# PROJECT CHARTER (HIẾN CHƯƠNG DỰ ÁN)
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin dự án | Chi tiết |
@@ -70,3 +70,4 @@ gantt
     Nghiệm thu thực tế (UAT)             : des7, 2026-07-30, 5d
     Ra mắt phiên bản Beta                : des8, 2026-08-05, 1d
 ```
+

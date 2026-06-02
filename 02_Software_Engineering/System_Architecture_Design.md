@@ -1,4 +1,4 @@
-# 🏛️ SYSTEM ARCHITECTURE & DATABASE DESIGN
+﻿# SYSTEM ARCHITECTURE & DATABASE DESIGN
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -104,3 +104,4 @@ Bảng cốt lõi liên kết giữa người dùng và quán ăn, lưu vết b�
     *   `id` (PK), `name`, `description`, `icon_url`, `badge_type`.
 *   **Bảng `user_badges`:** Mối quan hệ nhiều - nhiều giữa người dùng và huy hiệu họ đạt được.
     *   `user_id` (FK), `badge_id` (FK), `acquired_at` (Thời gian nhận).
+

@@ -1,4 +1,4 @@
-# 🛡️ ANTI-FRAUD SPECIFICATION & TRUST ALGORITHMS
+﻿# ANTI-FRAUD SPECIFICATION & TRUST ALGORITHMS
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -80,3 +80,4 @@ Trong đó:
 | **Verified Review (Có hóa đơn/GPS)**| Cấp 2: Thực Thần Tập Sự | **0.8** | Tài khoản đã hoạt động ổn định. |
 | **Verified Review (Có hóa đơn/GPS)**| Cấp 3: Người Sành Ăn | **1.0** | Trọng số chuẩn của chuyên gia trung thực. |
 | **Verified Review (Có hóa đơn/GPS)**| Cấp 4: Thần Ăn Đã Chứng | **1.5** | Đóng góp cực kỳ uy tín, có tầm ảnh hưởng lớn nhất. |
+

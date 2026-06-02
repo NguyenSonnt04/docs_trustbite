@@ -1,4 +1,4 @@
-# ☁️ AWS CLOUD INFRASTRUCTURE & ARCHITECTURE SPECIFICATION
+﻿# AWS CLOUD INFRASTRUCTURE & ARCHITECTURE SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -81,3 +81,4 @@ graph TD
 *   **Nguyên tắc đặc quyền tối thiểu (Least Privilege):** Tất cả các dịch vụ AWS tương tác với nhau đều được phân quyền chặt chẽ thông qua các vai trò **AWS IAM (Identity and Access Management)**. Ví dụ: Dịch vụ Lambda chỉ có quyền ghi vào bảng `users` chứ không có quyền xóa dữ liệu.
 *   **Mạng ảo cô lập (Amazon VPC):** Cơ sở dữ liệu RDS và cụm container ECS được đặt hoàn toàn trong **Private Subnet** (Mạng nội bộ bảo mật), không thể truy cập trực tiếp từ Internet. Chỉ có duy nhất API Gateway mới có quyền gọi các dịch vụ này thông qua các VPC Endpoints.
 *   **Giám sát thời gian thực:** Sử dụng **Amazon CloudWatch** kết hợp **AWS X-Ray** để theo dõi chi tiết hiệu năng của từng dòng code backend, tự động gửi cảnh báo (Alarms) về email hoặc Telegram của đội ngũ kỹ thuật nếu hệ thống gặp lỗi hoặc quá tải.
+

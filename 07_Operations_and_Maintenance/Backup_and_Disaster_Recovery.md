@@ -1,4 +1,4 @@
-# 💾 BACKUP & DISASTER RECOVERY SPECIFICATION
+﻿# BACKUP & DISASTER RECOVERY SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -48,3 +48,4 @@ Hệ thống tận dụng tối đa các dịch vụ sao lưu tự động của
     4.  Kiểm tra tính nhất quán dữ liệu trên máy chủ RDS mới được dựng lên.
     5.  Cập nhật DNS trỏ API về máy chủ RDS mới và mở lại hệ thống.
 *   **Thời gian gián đoạn:** **< 30 phút** ($RTO = 30m$, $RPO = 5s$).
+

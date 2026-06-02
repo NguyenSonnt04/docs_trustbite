@@ -1,4 +1,4 @@
-# 📝 SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+﻿# SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -55,3 +55,4 @@ Khi người dùng thực hiện review, nếu họ chọn xác thực vị trí
 ### 3.2. Hiệu năng & Khả năng Mở rộng (Performance & Scalability)
 *   **Tốc độ phản hồi (Response Time):** Thời gian tải trang chủ và thực hiện các câu truy vấn tìm kiếm quán ăn phải dưới **1.0 giây** trong điều kiện mạng ổn định.
 *   **Khả năng chịu tải (Concurrent Users):** Hệ thống được thiết kế để chịu tải tối thiểu **1,000 kết nối đồng thời** trên mỗi giây (1,000 TPS) không gây suy giảm hiệu năng.
+

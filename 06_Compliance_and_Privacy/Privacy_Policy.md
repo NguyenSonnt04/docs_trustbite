@@ -1,4 +1,4 @@
-# 🛡️ PRIVACY POLICY & USER DATA PROTECTION SPECIFICATION
+﻿# PRIVACY POLICY & USER DATA PROTECTION SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -43,3 +43,4 @@ Do đặc thù nền tảng **TrustBite** yêu cầu thu thập các dữ liệu
 
 *   **Không mua bán dữ liệu:** TrustBite cam kết tuyệt đối không bán, cho thuê hoặc chia sẻ dữ liệu hóa đơn, số điện thoại hay vị trí của người dùng cho bất kỳ bên thứ ba nào (kể cả các quán ăn đối tác trên hệ thống) vì mục đích quảng cáo hay tiếp thị.
 *   **Quyền được xóa dữ liệu (Right to be Forgotten):** Người dùng có quyền yêu cầu xóa vĩnh viễn tài khoản của mình trên hệ thống. Khi tài khoản bị xóa, toàn bộ số điện thoại, lịch sử review và các ảnh hóa đơn liên quan sẽ bị xóa sạch khỏi cơ sở dữ liệu và lưu trữ đám mây của chúng tôi trong vòng 72 giờ làm việc.
+

@@ -1,4 +1,4 @@
-# 💻 TECHNOLOGY STACK & ECOLOGICAL SPECIFICATION
+﻿# TECHNOLOGY STACK & ECOLOGICAL SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -53,3 +53,4 @@ Backend được xây dựng theo kiến trúc **Modular Architecture** sử d�
 *   **Quản lý Package:** **pnpm** (Tốc độ cài đặt nhanh hơn npm/yarn và tiết kiệm dung lượng ổ đĩa tối đa nhờ cơ chế hard link).
 *   **Quy chuẩn viết code:** **ESLint** (Quy tắc cấu trúc code) kết hợp **Prettier** (Tự động format căn lề code). Thiết kế sẵn file `.eslintrc.json` và `.prettierrc` trong thư mục dự án.
 *   **Công cụ chạy cục bộ (Docker):** Sử dụng **Docker Compose** để khởi tạo nhanh môi trường PostgreSQL và Redis cục bộ trên máy của Developer chỉ bằng một dòng lệnh (`docker-compose up -d`), giúp tiết kiệm thời gian cấu hình môi trường.
+
