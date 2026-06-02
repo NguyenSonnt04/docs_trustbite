@@ -1,10 +1,10 @@
-﻿# ANTI-FRAUD SPECIFICATION & TRUST ALGORITHMS
+# ANTI-FRAUD SPECIFICATION & TRUST ALGORITHMS
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
 | :--- | :--- |
 | **Loại tài liệu** | Anti-Fraud Specification & Trust Algorithms |
-| **Phiên bản** | v1.0.0 (Enterprise Standard) |
+| **Phiên bản** | v1.1.0 (Enterprise Standard) |
 | **Tác giả** | Lead Data Engineer / Security Architect |
 | **Trạng thái** | Đã phê duyệt (Approved) |
 
@@ -40,7 +40,7 @@ graph TD
     Hash --> CheckHash{Mã Hash đã tồn tại?}
     
     CheckHash -->|Có - Trùng lặp| RejectHash[Từ chối: Hóa đơn bị lạm dụng]
-    CheckHash -->|Không - Hợp lệ| OCR[2. Gửi ảnh lên Google Cloud Vision OCR]
+    CheckHash -->|Không - Hợp lệ| OCR[2. Gửi ảnh lên AWS Textract]
     
     OCR --> NLP[3. Trích xuất Text & Chạy thuật toán so khớp Levenshtein]
     NLP --> CompareTime{4. Thời gian trên hóa đơn <= 48 giờ?}
@@ -81,3 +81,23 @@ Trong đó:
 | **Verified Review (Có hóa đơn/GPS)**| Cấp 3: Người Sành Ăn | **1.0** | Trọng số chuẩn của chuyên gia trung thực. |
 | **Verified Review (Có hóa đơn/GPS)**| Cấp 4: Thần Ăn Đã Chứng | **1.5** | Đóng góp cực kỳ uy tín, có tầm ảnh hưởng lớn nhất. |
 
+---
+
+## 4. PHÒNG THỦ CHIỀU SÂU CHỐNG TÀI KHOẢN CLONE (SYBIL DEFENSE SPECS)
+
+Để ngăn chặn việc đối thủ hoặc đơn vị làm dịch vụ seeding sử dụng hàng chục tài khoản ảo (Clone accounts) để thao túng điểm số của quán ăn, hệ thống áp dụng cơ chế phòng thủ 3 lớp chuyên sâu:
+
+### 4.1. Thuật toán Định danh Thiết bị (Device Fingerprinting)
+*   **Mô tả:** Hệ thống không chỉ dựa vào địa chỉ IP (dễ bị thay đổi bằng 4G hoặc VPN) mà sử dụng kỹ thuật trích xuất dấu vân tay phần cứng sâu (`DeviceID`).
+*   **Các thông số thu thập:** Độ phân giải màn hình hiển thị, Cấu hình Canvas WebGL, Danh sách Fonts hệ thống, Các WebAPI khả dụng trên trình duyệt.
+*   **Quy tắc gom cụm (Clustering Rule):** Nếu cơ sở dữ liệu phát hiện >= 3 tài khoản đăng nhập hoặc gửi bài review cho cùng 1 quán ăn từ chung một mã `DeviceID` trong vòng 24 giờ, toàn bộ các tài khoản này sẽ tự động bị gắn cờ là **Cụm Tài Khoản Nghi Vấn (Sybil Cluster)**.
+
+### 4.2. Cơ chế Khóa Ẩn Danh (Shadowban Strategy)
+*   Đối với các tài khoản nằm trong diện nghi vấn (Sybil Cluster) hoặc có hành vi photoshop hóa đơn:
+    *   Hệ thống không hiện thông báo khóa tài khoản (tránh việc kẻ xấu phát hiện ra cơ chế lọc và đổi thiết bị khác).
+    *   **Cơ chế hoạt động:** Bài review của tài khoản bị shadowban vẫn được đăng thành công và hiển thị bình thường trên máy của người viết (họ tưởng đã seeding thành công). Tuy nhiên, **tất cả người dùng khác trên toàn hệ thống đều không nhìn thấy** bài viết này, và điểm số của quán cũng hoàn toàn không bị thay đổi.
+
+### 4.3. Thuật toán Phân tích Đồ thị Hành vi Trùng hợp (Behavioral Graph AI)
+*   Hệ thống chạy một luồng phân tích định kỳ so sánh biểu đồ hành vi của các tài khoản.
+*   **Nguyên lý:** Người dùng bình thường luôn đi ăn uống ngẫu nhiên. Nhóm tài khoản clone đi seeding thường có biểu đồ hành vi trùng lặp (ví dụ: cùng đánh giá 5 sao cho quán A ngày 1, cùng đánh giá 5 sao cho quán B ngày 2, và cùng đánh giá 1 sao cho quán C ngày 3).
+*   Nếu độ tương đồng (Cosine Similarity) về lịch sử hoạt động giữa một nhóm tài khoản lớn hơn **85%**, toàn bộ nhóm tài khoản này sẽ bị tự động khóa vĩnh viễn trên toàn hệ thống TrustBite.
