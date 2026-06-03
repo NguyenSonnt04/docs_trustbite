@@ -1,4 +1,4 @@
-﻿# AWS CLOUD INFRASTRUCTURE & ARCHITECTURE SPECIFICATION
+# AWS CLOUD INFRASTRUCTURE & ARCHITECTURE SPECIFICATION
 ## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
 
 | Thông tin tài liệu | Chi tiết |
@@ -13,6 +13,8 @@
 ## 1. TỔNG QUAN KIẾN TRÚC CLOUD NATIVE AWS (ARCHITECTURAL OVERVIEW)
 
 Để đảm bảo khả năng mở rộng (Scalability), tính sẵn sàng cao (High Availability), bảo mật tuyệt đối (Enterprise Security) và tối ưu hóa chi phí, toàn bộ hệ thống **TrustBite** được thiết kế để vận hành 100% trên hạ tầng điện toán đám mây **Amazon Web Services (AWS)**. 
+
+![TrustBite AWS Architecture Diagram](../assets/trustbite_architecture.png)
 
 Hệ thống áp dụng kiến trúc **Serverless & Containerization** kết hợp:
 
