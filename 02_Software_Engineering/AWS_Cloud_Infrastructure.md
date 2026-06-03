@@ -16,6 +16,15 @@
 
 ![TrustBite AWS Architecture Diagram](../assets/trustbite_architecture.png)
 
+### Quy trình xử lý luồng dữ liệu (Step-by-Step Data Flow):
+1. **Yêu cầu giao diện (Client & Delivery):** Khách ăn hoặc chủ quán truy cập Next.js Frontend thông qua Amazon Route 53 và CloudFront CDN.
+2. **Gửi dữ liệu đánh giá & hóa đơn:** Thiết bị khách hàng gửi dữ liệu review kèm ảnh chụp hóa đơn đi qua màng lọc bảo mật AWS WAF và API Gateway.
+3. **Định vị & Kiểm tra tọa độ (Compute):** API Gateway chuyển request đến Backend Node.js (NestJS) chạy trên Amazon ECS Fargate để tính khoảng cách Haversine đối chiếu GPS.
+4. **Lưu trữ & Kích hoạt OCR:** Ảnh hóa đơn được lưu vào S3 Receipts Bucket và gửi yêu cầu quét trích xuất thông tin chữ viết tự động đến Amazon Textract.
+5. **Tổng hợp đánh giá AI:** Sau khi hóa đơn được xác thực hợp lệ, backend gửi toàn bộ review verified của quán đến Amazon Bedrock (Claude 3.5 Sonnet) để sinh tóm tắt Pros/Cons.
+6. **Lưu trữ dữ liệu & Cập nhật điểm:** Review đã xác minh được lưu vào database chính Amazon RDS PostgreSQL (thông qua RDS Proxy để kiểm soát kết nối) và cập nhật cache Redis. Hệ thống tự động tính lại điểm Trust Score của quán.
+7. **Thông báo đa kênh (Alerting):** Amazon SNS tiếp nhận sự kiện và gửi tin nhắn OTP xác thực hoặc bắn thông báo đẩy (Push Notifications) về chatroom Telegram/Discord/Slack.
+
 Hệ thống áp dụng kiến trúc **Serverless & Containerization** kết hợp:
 
 ```mermaid
