@@ -1,73 +1,137 @@
-﻿# PROJECT CHARTER (HIẾN CHƯƠNG DỰ ÁN)
-## DỰ ÁN: PLATFORM ĐÁNH GIÁ ẨM THỰC TIN CẬY - TRUSTBITE
+# Hiến chương dự án - TrustBite
 
-| Thông tin dự án | Chi tiết |
-| :--- | :--- |
-| **Tên dự án** | TrustBite (Đại diện cho: "Sự tin cậy trong từng miếng ăn") |
-| **Phiên bản tài liệu** | v1.0.0 (Enterprise Standard) |
-| **Ngày khởi tạo** | 01/06/2026 |
-| **Người phê duyệt** | Ban Giám đốc Dự án (Project Sponsor) |
-
----
-
-## 1. BỐI CẢNH & TẦM NHÌN DỰ ÁN (PROJECT CONTEXT & VISION)
-
-### 1.1. Bối cảnh thị trường
-Hiện nay, thị trường review ẩm thực đang bị thao túng mạnh mẽ bởi các chiến dịch seeding quảng cáo và các KOL/KOC nhận tiền để viết đánh giá tâng bốc chất lượng món ăn. Điều này dẫn tới sự suy giảm nghiêm trọng lòng tin của người tiêu dùng đối với các nền tảng review truyền thống. Người dùng có xu hướng tìm kiếm những đánh giá thực tế, không thiên vị nhưng thiếu một nền tảng xác thực uy tín để tin cậy.
-
-### 1.2. Tầm nhìn chiến lược
-**TrustBite** hướng tới trở thành nền tảng số 1 về đánh giá ẩm thực chân thực tại Việt Nam, nơi mỗi đánh giá đều được xác minh chặt chẽ thông qua dữ liệu số (hóa đơn thanh toán, tọa độ định vị thực tế). TrustBite nói **KHÔNG** với việc nhận tiền quảng cáo để thay đổi điểm số, đảm bảo tính khách quan tối đa cho người dùng.
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Dự án | TrustBite - Nền tảng đánh giá ẩm thực tin cậy |
+| Phiên bản | v2.0.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | Chủ sở hữu sản phẩm |
+| Ngày cập nhật | 2026-06-07 |
 
 ---
 
-## 2. MỤC TIÊU DỰ ÁN (PROJECT OBJECTIVES - OKRs)
+## 1. Bối cảnh
 
-*   **Objective 1 (Xây dựng lòng tin):** Đạt tỷ lệ >95% review trên hệ thống là review được xác minh thực tế (Verified Reviews) có kèm hóa đơn/GPS trong vòng 6 tháng đầu hoạt động.
-*   **Objective 2 (Độ lớn cộng đồng):** Thu hút 50,000 người dùng hoạt động hàng tháng (MAU) và 5,000 quán ăn đăng ký tài khoản xác minh uy tín.
-*   **Objective 3 (Độ tin cậy kỹ thuật):** Hệ thống OCR nhận diện hóa đơn chính xác >90% đối với các hóa đơn in từ các phần mềm POS phổ biến.
+Thị trường đánh giá ẩm thực bị ảnh hưởng bởi seeding, quảng cáo trá hình và đánh giá thiếu bằng chứng. Người dùng khó phân biệt trải nghiệm thật với nội dung được tài trợ hoặc thao túng. TrustBite giải quyết vấn đề này bằng cách ưu tiên đánh giá có bằng chứng: hóa đơn, thời gian ghé quán, dữ liệu GPS tùy chọn và quy trình kiểm duyệt minh bạch.
 
 ---
 
-## 3. PHẠM VI DỰ ÁN (PROJECT SCOPE)
+## 2. Tầm nhìn
 
-### 3.1. Phạm vi thực hiện (In-Scope)
-*   Xây dựng hệ thống Web Application (Responsive chạy tốt trên cả Desktop và Mobile).
-*   Phát triển **Động cơ chống gian lận (Anti-Fraud Engine)** bao gồm: quét OCR hóa đơn, đối chiếu tọa độ định vị GPS, thuật toán phát hiện seeding trùng lặp.
-*   Thiết kế hệ thống **Game hóa (Gamification)** để thăng cấp bậc (Ranks) và tích lũy huy hiệu (Badges) dựa trên độ uy tín cá nhân.
-*   Xây dựng 3 cổng giao diện chuyên biệt: Khách ăn (User App), Chủ quán (Merchant Portal), và Quản trị viên (Admin Portal).
-
-### 3.2. Nằm ngoài phạm vi (Out-of-Scope trong Giai đoạn 1)
-*   Ứng dụng di động Native App (iOS/Android) trên App Store và Google Play (sẽ triển khai ở Giai đoạn 2).
-*   Hệ thống liên kết trực tiếp để đặt bàn hoặc thanh toán trực tuyến (Booking & Payment Gateway).
+TrustBite hướng tới trở thành nền tảng đánh giá ẩm thực minh bạch tại Việt Nam, nơi điểm số của quán được tính dựa trên độ tin cậy của đánh giá thay vì số lượng đánh giá đơn thuần.
 
 ---
 
-## 4. CƠ CẤU NHÂN SỰ & VAI TRÒ (ORGANIZATIONAL STRUCTURE)
+## 3. Ranh giới MVP
 
-*   **Product Owner (PO):** Định hướng sản phẩm, quản lý Product Backlog, làm việc trực tiếp với các bên liên quan.
-*   **System Architect (SA):** Thiết kế kiến trúc hệ thống, sơ đồ cơ sở dữ liệu và đảm bảo khả năng mở rộng.
-*   **Frontend & Backend Engineers:** Phát triển giao diện người dùng và logic xử lý dữ liệu backend (OCR, API, Bảo mật).
-*   **QA/QC Team:** Thiết lập kế hoạch kiểm thử, viết testcase và thực hiện nghiệm thu sản phẩm (UAT).
-*   **Admin Operations:** Đội ngũ vận hành, duyệt hồ sơ quán ăn và xử lý khiếu nại chất lượng review.
+TrustBite MVP là mobile-first: người dùng cuối dùng app iOS/Android; admin portal dùng web để xử lý hàng đợi, kiểm duyệt và audit.
+
+MVP của TrustBite tập trung chứng minh 3 giả thuyết chính:
+
+1. Người dùng có sẵn sàng tải hóa đơn để đổi lấy đánh giá đáng tin cậy không?
+2. Đánh giá đã xác minh có làm tăng niềm tin khi chọn quán không?
+3. Chủ quán có sẵn sàng tham gia nền tảng minh bạch hóa chất lượng không?
+
+Các chức năng ngoài 3 giả thuyết trên sẽ được đưa sang giai đoạn sau.
 
 ---
 
-## 5. LỘ TRÌNH PHÁT TRIỂN CẤP CAO (HIGH-LEVEL MILESTONES)
+## 4. Mục tiêu MVP
 
-```mermaid
-gantt
-    title Lộ trình Phát triển Dự án TrustBite (Giai đoạn MVP)
-    dateFormat  YYYY-MM-DD
-    section Chuẩn bị & Đặc tả
-    Đặc tả yêu cầu (SRS) & Thiết kế DB    :active, des1, 2026-06-01, 7d
-    Thiết kế UI/UX (Figma/Wireframes)    : des2, 2026-06-05, 10d
-    section Phát triển (Development)
-    Lập trình Backend & API              : des3, 2026-06-15, 20d
-    Tích hợp OCR & Thuật toán chống lận  : des4, 2026-06-25, 15d
-    Lập trình Frontend & Giao diện web   : des5, 2026-07-05, 20d
-    section Kiểm thử & Vận hành
-    Kiểm thử hệ thống (QA/QC)            : des6, 2026-07-20, 10d
-    Nghiệm thu thực tế (UAT)             : des7, 2026-07-30, 5d
-    Ra mắt phiên bản Beta                : des8, 2026-08-05, 1d
-```
+| Mục tiêu | Chỉ số đo |
+|---|---|
+| Xác thực hành vi đánh giá thật | >= 60% đánh giá mới có hóa đơn tải trong giai đoạn beta |
+| Giảm đánh giá spam/seeding | 100% hóa đơn tải được hash check |
+| Tạo giá trị cho người chọn quán | >= 70% người dùng khảo sát hiểu nhãn đã xác minh/tham khảo |
+| Vận hành được luồng quản trị viên | 95% trường hợp chờ xử lý được xử lý trong 24 giờ làm việc |
 
+Lưu ý: Các mục tiêu lớn như 50,000 người dùng hoạt động hằng tháng, 5,000 chủ quán hoặc OCR >90% được chuyển sang V1/V2 sau khi MVP có dữ liệu thật.
+
+---
+
+## 5. Phạm vi theo giai đoạn
+
+### 5.1. MVP bắt buộc có
+
+| Module | Chức năng |
+|---|---|
+| Xác thực | Đăng ký/đăng nhập OTP, giới hạn tần suất OTP |
+| Quán | Danh sách quán, chi tiết quán, tìm kiếm, bản đồ cơ bản |
+| Đánh giá | Viết đánh giá 4 tiêu chí, bình luận, media cơ bản |
+| Hóa đơn | Upload hóa đơn, kiểm tra file, kiểm tra hash trùng, OCR cơ bản |
+| GPS | Lấy GPS nếu người dùng cấp quyền, dùng như tín hiệu rủi ro |
+| Điểm tin cậy | Công thức V1 dựa trên trạng thái đánh giá và cấp hạng người dùng |
+| Quản trị viên | Duyệt quán, duyệt hóa đơn/đánh giá nghi vấn, xử lý báo cáo |
+| Kiểm duyệt | Report đánh giá, ẩn/xóa nội dung vi phạm |
+| Game hóa | EXP cơ bản, rank cơ bản |
+
+### 5.2. V1.1 nên có
+
+| Module | Chức năng |
+|---|---|
+| Cổng chủ quán | Claim quán, cập nhật thông tin, phản hồi đánh giá |
+| Thông báo | Email/trong ứng dụng thông báo cho đánh giá/báo cáo/quyết định của quản trị viên |
+| Điểm tin cậy | Chấm điểm rủi ro tinh chỉnh theo dữ liệu thật |
+| Kiểm duyệt | Hàng đợi lọc theo mức độ nghiêm trọng |
+| Đánh giá | Bình chọn hữu ích, danh sách yêu thích |
+
+### 5.3. Tương lai
+
+| Module | Chức năng |
+|---|---|
+| AI | tóm tắt AI bằng Bedrock/LLM |
+| Fraud | AI đồ thị hành vi, phân tích ảnh nâng cao nâng cao |
+| Game hóa | nhiệm vụ bí mật, nhiệm vụ FOODGOD, hoàn tiền |
+| Mở rộng | Kiến trúc cho 20,000 người dùng đồng thời |
+| Giá | Chênh lệch giá nâng cao dựa trên menu/hóa đơn history |
+
+---
+
+## 6. Ngoài phạm vi MVP
+
+- Ứng dụng mobile native iOS/Android.
+- Cổng đặt chỗ/thanh toán.
+- Quy trình hoàn tiền cho nhiệm vụ bí mật.
+- tóm tắt AI tự động.
+- Fingerprint thiết bị nâng cao bắt buộc.
+- AI đồ thị hành vi.
+- Hạ tầng quy mô 20,000 người dùng đồng thời.
+
+---
+
+## 7. Vai trò dự án
+
+| Vai trò | Trách nhiệm |
+|---|---|
+| Chủ sở hữu sản phẩm | Phạm vi, lộ trình, ưu tiên backlog |
+| Chuyên viên phân tích nghiệp vụ | Đặc tả chức năng, quy tắc nghiệp vụ, máy trạng thái |
+| Nhà thiết kế UX/UI | Luồng người dùng, danh sách màn hình, yêu cầu wireframe |
+| Kiến trúc sư hệ thống | Kiến trúc, nguyên tắc API, thiết kế DB |
+| Kỹ sư backend | API, hàng đợi OCR, chấm điểm gian lận, quy trình quản trị |
+| Kỹ sư frontend | Ứng dụng người dùng, cổng chủ quán, cổng quản trị |
+| QA/QC | Kế hoạch kiểm thử, UAT, hồi quy, tiêu chí nghiệm thu |
+| Vận hành quản trị | Duyệt quán, xử lý báo cáo, xác minh thủ công |
+
+---
+
+## 8. Milestone đề xuất
+
+| Giai đoạn | Kết quả bàn giao |
+|---|---|
+| Giai đoạn 1 - Nền tảng tài liệu | PRD, Functional Spec, Role Matrix, State Machines, Quy tắc nghiệp vụ |
+| Giai đoạn 2 - Hợp đồng kỹ thuật | Đặc tả API, SRS, Schema DB, Từ điển dữ liệu |
+| Giai đoạn 3 - Đồng bộ UX/QA | Danh sách màn hình, Luồng người dùng, Tiêu chí nghiệm thu, UAT Test Cases |
+| Giai đoạn 4 - Xây dựng MVP | Xác thực, Quán, Đánh giá, Hóa đơn, Quản trị viên basic |
+| Giai đoạn 5 - Xác thực beta | Dữ liệu thật, đo mức độ sử dụng, điều chỉnh điểm rủi ro |
+
+---
+
+## 9. Rủi ro chính
+
+| Rủi ro | Ảnh hưởng | Giảm thiểu |
+|---|---|---|
+| OCR hóa đơn Việt Nam không ổn định | Đánh giá đã xác minh thấp | Cho manual đánh giá và risk scoring thay vì quy tắc cứng |
+| Người dùng ngại tải hóa đơn | Không kiểm chứng được giả thuyết cốt lõi | Giải thích quyền riêng tư, che thông tin nhạy cảm, game hóa |
+| Quản trị viên quá tải | Hàng đợi pending chậm | Ưu tiên quyết định tự động cho case risk thấp/cao rõ ràng |
+| Chủ quán phản đối đánh giá xấu | Tranh chấp vận hành | Report quy trình, audit log, chính sách rõ |
+| Quyền riêng tư với GPS/dữ liệu thiết bị | Rủi ro pháp lý | GPS optional, tối thiểu hóa dữ liệu, retention chính sách |
