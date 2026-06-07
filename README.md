@@ -1,48 +1,138 @@
-# TRUSTBITE - RESTORING TRUST IN FOOD REVIEWS
+# TRUSTBITE - Kho tài liệu
 
-Welcome to the official documentation repository for the **TrustBite** project ("Trust in every bite"). This repository contains the comprehensive, enterprise-standard specification documents designed and structured to guide the development, testing, and operations of the platform.
+TrustBite là nền tảng đánh giá ẩm thực tập trung vào đánh giá có bằng chứng thực tế: hóa đơn, thời gian ghé quán, dữ liệu vị trí tùy chọn và quy trình kiểm duyệt minh bạch.
 
----
-
-## SYSTEM DOCUMENTATION TREE
-
-The documentation is organized into specialized directories corresponding to different operational domains and technical departments:
-
-### 01. Product Management
-Defines the business vision and core product requirements:
-*   **Project Charter**: High-level project guidelines, roadmap, milestones, resources, and OKRs.
-*   **Product Requirements Document (PRD)**: User personas, functional requirements, and prioritized feature roadmap (P0, P1, P2).
-
-### 02. Software Engineering
-System architecture designs, AWS cloud infrastructure blueprints, and DevOps automation workflows:
-*   **Software Requirements Specification (SRS)**: Detailed functional specs and technical constraints for core features.
-*   **System Architecture & Database Design**: High-level architectural patterns and database ERD overview.
-*   **AWS Cloud Infrastructure**: 100% cloud-native AWS design (Lambda, ECS Fargate, WAF, Cognito, Textract).
-*   **CI/CD Pipeline & Deployment Playbook**: Automation pipelines (Git branch model, Docker, Blue/Green deployment, and IaC).
-*   **Technology Stack Specification**: Detailed NPM package ecosystem, Next.js v14, and Node.js (NestJS) specifications.
-
-### 03. Security & Algorithms
-The core mathematical and analytical engine of TrustBite:
-*   **Anti-Fraud Specification**: GPS validation using the Haversine formula, receipt text extraction using OCR Levenshtein distance, and weighted RestTrustScore algorithms.
-*   **Gamification Design**: User reputation tiers (EXP progression), core badges, and social rank permissions.
-
-### 04. Database Design
-*   **PostgreSQL Database Schema**: Schema specifications, relational designs, key indexes (B-Tree, GiST PostGIS), and automated rating-sync triggers.
-
-### 05. Testing & QA
-*   **System Test Plan**: User Acceptance Testing (UAT) scenarios designed specifically to validate the anti-fraud and gamification mechanics.
-
-### 06. Compliance & Privacy
-*   **Privacy Policy**: Data protection guidelines, receipt image masking filters, and GPS location tracking rules complying with privacy laws.
-*   **Content Moderation Policy**: Three-tier content moderation pipeline, spam detection rules, and penalty guidelines for users and merchants.
-
-### 07. Operations & Maintenance
-*   **Backup & Disaster Recovery**: Automated RDS backup strategies, PITR recovery procedures, cross-region replication, and RTO/RPO targets.
+Bộ tài liệu này được chuẩn hóa theo hướng **triển khai được**: Sản phẩm → Phân tích nghiệp vụ → UX/UI → Kỹ thuật → Cơ sở dữ liệu → QA → Tuân thủ → Vận hành.
 
 ---
 
-## TECHNICAL STACK SUMMARY
-*   **Frontend:** Next.js v14+ (TypeScript, Tailwind CSS, Zustand, React Query)
-*   **Backend:** Node.js v20+ (NestJS Framework, TypeScript, Prisma ORM, BullMQ)
-*   **Database & Cache:** PostgreSQL (Amazon RDS) & Redis (Amazon ElastiCache)
-*   **Cloud Infrastructure:** Amazon Web Services (AWS)
+## 1. Cây tài liệu
+
+```text
+docs_trustbite/
+├── 00_Document_Control/
+│   ├── Document_Index.md
+│   ├── Version_History.md
+│   └── Glossary.md
+│
+├── 01_Product_Management/
+│   ├── Project_Charter.md
+│   ├── Product_Requirements_Document_PRD.md
+│   ├── MVP_Scope.md
+│   ├── User_Personas.md
+│   ├── Product_Roadmap.md
+│   └── Product_Analytics_Tracking_Plan.md
+│
+├── 02_Business_Analysis/
+│   ├── Functional_Specification.md
+│   ├── User_Stories_Backlog.md
+│   ├── Role_Permission_Matrix.md
+│   ├── Business_Rules.md
+│   └── State_Machines.md
+│
+├── 03_UX_UI/
+│   ├── Screen_List.md
+│   ├── User_Flows.md
+│   ├── Wireframe_Requirements.md
+│   ├── Mobile_Navigation_Map.md
+│   ├── Mobile_Screen_Specification.md
+│   └── Design_System.md
+│
+├── 04_Software_Engineering/
+│   ├── Software_Requirements_Specification_SRS.md
+│   ├── API_Specification.md
+│   ├── System_Architecture_Design.md
+│   ├── Tech_Stack_Specification.md
+│   ├── AWS_Cloud_Infrastructure.md
+│   ├── High_Availability_Scaling_Strategy.md
+│   ├── CI_CD_Pipeline.md
+│   ├── Mobile_App_Architecture.md
+│   └── OpenAPI_Guidelines.md
+│
+├── 05_Security_Algorithms/
+│   ├── Anti_Fraud_Specification.md
+│   ├── Gamification_Design.md
+│   └── Security_Threat_Model.md
+│
+├── 06_Database_Design/
+│   ├── PostgreSQL_Database_Schema.md
+│   ├── ERD.md
+│   └── Data_Dictionary.md
+│
+├── 07_Testing_and_QA/
+│   ├── Test_Plan.md
+│   ├── UAT_Test_Cases.md
+│   ├── Acceptance_Criteria.md
+│   ├── Mobile_Test_Plan.md
+│   └── Device_Test_Matrix.md
+│
+├── 08_Compliance_and_Privacy/
+│   ├── Privacy_Policy.md
+│   ├── Data_Retention_Policy.md
+│   └── Content_Moderation_Policy.md
+│
+├── 09_Operations_and_Maintenance/
+│   ├── Backup_and_Disaster_Recovery.md
+│   └── Mobile_Release_Checklist.md
+│
+└── assets/
+    └── trustbite_architecture.png
+```
+
+---
+
+## 2. Mức ưu tiên triển khai
+
+| Mức ưu tiên | Nhóm việc | Tài liệu liên quan |
+|---|---|---|
+| P0 | Phạm vi MVP, quy tắc nghiệp vụ lõi, phân quyền, trạng thái nghiệp vụ | Project Charter, PRD, Functional Specification, Business Rules, Role Permission Matrix, State Machines |
+| P0 | Hợp đồng API, mobile architecture và dữ liệu | API Specification, OpenAPI Guidelines, Mobile App Architecture, SRS, DB Schema, Data Dictionary |
+| P0 | Nghiệm thu và kiểm thử | Acceptance Criteria, UAT Test Cases, Test Plan, Mobile Test Plan, Device Test Matrix |
+| P1 | Cổng chủ quán, kiểm duyệt nâng cao và notification | Functional Specification, SRS, API, DB, Mobile Release Checklist |
+| P2 | Tóm tắt AI, nhiệm vụ bí mật, đồ thị gian lận nâng cao, hạ tầng quy mô lớn | Roadmap và tài liệu kỹ thuật tương lai |
+
+---
+
+## 3. Ranh giới MVP
+
+MVP của TrustBite tập trung chứng minh 3 giả thuyết:
+
+1. Người dùng có sẵn sàng tải hóa đơn để đổi lấy đánh giá đáng tin cậy không?
+2. Đánh giá đã xác minh có làm tăng niềm tin khi chọn quán không?
+3. Chủ quán có sẵn sàng tham gia nền tảng minh bạch hóa chất lượng không?
+
+Các chức năng không phục vụ trực tiếp 3 giả thuyết này được chuyển sang V1.1 hoặc tương lai.
+
+---
+
+## 4. Tóm tắt công nghệ
+
+TrustBite được định hướng **mobile-first**. Mobile app là client chính cho người dùng cuối; web được dùng cho admin portal và merchant portal.
+
+| Lớp | Công nghệ đề xuất |
+|---|---|
+| Mobile app | React Native + TypeScript là phương án ưu tiên MVP; Flutter + Dart là phương án thay thế nếu team mạnh về Flutter |
+| Admin portal | Next.js, TypeScript |
+| Merchant portal | Next.js, TypeScript ở V1.1 hoặc khi cần kiểm chứng giả thuyết chủ quán |
+| Backend | Node.js, NestJS, TypeScript, Prisma ORM |
+| Database | PostgreSQL + PostGIS |
+| Cache/Queue | Redis + BullMQ |
+| OCR | AWS Textract hoặc OCR provider tương đương |
+| Storage | S3-compatible object storage |
+| Auth | OTP SMS, access token + refresh/session token |
+| Infra | AWS container/managed services, RDS, S3, Redis, mobile beta distribution |
+
+---
+
+## 5. Quy tắc trạng thái tài liệu
+
+Tài liệu chỉ được đánh dấu `Đã phê duyệt` khi có đủ:
+
+- chủ sở hữu,
+- phiên bản,
+- người rà soát,
+- tiêu chí nghiệm thu,
+- tác động tới API/database/QA nếu có,
+- ngày hiệu lực.
+
+Trong giai đoạn phân tích, tài liệu nên để trạng thái `Bản nháp` hoặc `Đang rà soát`.
