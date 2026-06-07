@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Quy trình CI/CD và triển khai |
-| Phiên bản | v2.1.0 |
+| Phiên bản | v2.5.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | DevOps |
 | Ngày cập nhật | 2026-06-07 |
@@ -23,6 +23,7 @@ Quy tắc:
 - Không push trực tiếp vào `main` nếu chưa qua review.
 - Pull request phải chạy lint/test trước khi merge.
 - Thay đổi tài liệu lớn phải cập nhật `Version_History.md` nếu ảnh hưởng phạm vi MVP/API/DB/QA.
+- Quy ước branch/commit/code review chi tiết nằm trong `Development_Guidelines.md`.
 
 ---
 
@@ -47,7 +48,7 @@ Mỗi pull request cần chạy tối thiểu:
 | Local | Developer tự chạy | Docker Compose cho PostgreSQL/Redis, mobile app trỏ API local/staging. |
 | Staging | Merge vào `main` hoặc tag staging | Dùng cho QA/UAT. |
 | Beta mobile | Tag beta hoặc approval thủ công | TestFlight/Google Play Internal Testing. |
-| Production | Tag release hoặc approval thủ công | Cần backup/migration plan trước deploy. |
+| Production | Tag release hoặc approval thủ công | Cần backup/migration plan trước deploy và release note. |
 
 ---
 
@@ -79,3 +80,11 @@ Mỗi pull request cần chạy tối thiểu:
 - Database: ưu tiên migration backward-compatible; nếu bắt buộc rollback dữ liệu, cần backup trước deploy.
 - Worker: dừng worker mới và chạy lại worker ổn định trước đó nếu lỗi xử lý hàng đợi.
 - Mobile: rollback bằng cách dừng rollout, phát hành hotfix hoặc dùng feature flag để tắt tính năng lỗi nếu có.
+
+---
+
+## 7. Tài liệu liên quan
+
+- `Development_Guidelines.md`: quy chuẩn code, branch, commit, review và PR checklist.
+- `09_Operations_and_Maintenance/Deployment_Guide.md`: các bước deploy, verify và rollback chi tiết.
+- `09_Operations_and_Maintenance/Release_Notes.md`: template ghi nhận nội dung từng release.

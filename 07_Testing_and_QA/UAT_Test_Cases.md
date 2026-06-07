@@ -1,5 +1,15 @@
 # Kịch bản kiểm thử UAT - MVP TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | UAT test cases |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | QA / BA / PO |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 ## UAT-001: Người dùng tạo đánh giá đã xác minh
 
 1. Đăng nhập bằng OTP.
@@ -67,3 +77,41 @@ Kết quả mong đợi:
 
 - Claim chuyển APPROVED.
 - Chủ quán có thể chỉnh hồ sơ quán đã được duyệt.
+
+## UAT-007: Xóa tài khoản và dữ liệu
+
+1. Người dùng đăng nhập.
+2. Vào Cài đặt tài khoản và chọn xóa tài khoản.
+3. Đọc hậu quả, xác nhận chủ động và gửi yêu cầu.
+4. Kiểm tra web deletion link hoạt động ngoài app.
+
+Kết quả mong đợi:
+
+- Request xóa tài khoản được tạo và có trạng thái rõ.
+- Session/token bị revoke hoặc xử lý theo thiết kế.
+- PII được xóa hoặc ẩn danh hóa theo retention.
+- Audit tối thiểu tồn tại cho quy trình xử lý.
+
+## UAT-008: Báo cáo và chặn người dùng
+
+1. Người dùng báo cáo một review vi phạm.
+2. Người dùng thử báo cáo trùng cùng reason.
+3. Người dùng chặn và bỏ chặn tác giả review.
+4. Quản trị viên xử lý report trong admin queue.
+
+Kết quả mong đợi:
+
+- Báo cáo hợp lệ vào queue, báo cáo trùng bị chặn bằng copy rõ.
+- Chặn/bỏ chặn cập nhật đúng UI/API.
+- Admin decision ghi audit log và cập nhật trạng thái report/review.
+
+## UAT-009: Store submission readiness
+
+1. Release Manager kiểm tra `Store_Submission_Readiness_Checklist.md`.
+2. Legal/PO kiểm tra Privacy Policy, Data Safety mapping, Terms outline và content rating.
+3. QA dùng tài khoản demo/reviewer notes để chạy đủ luồng OTP, review, receipt, report/block, account deletion.
+
+Kết quả mong đợi:
+
+- Không có mismatch giữa app thật, tài liệu, store metadata và chính sách privacy/moderation.
+- Checklist được sign off trước khi submit App Store/Google Play.

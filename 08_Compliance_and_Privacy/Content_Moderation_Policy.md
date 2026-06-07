@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Chính sách kiểm duyệt nội dung |
-| Phiên bản | v2.1.0 |
+| Phiên bản | v2.2.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | Vận hành cộng đồng / Kiểm duyệt |
 | Ngày cập nhật | 2026-06-07 |
@@ -77,3 +77,22 @@ TrustBite quy định các loại nội dung không được hiển thị công 
 - Mọi hành động ẩn/xóa/khôi phục đánh giá phải ghi audit log.
 - Quyết định của quản trị viên phải có lý do.
 - Người bị ảnh hưởng nên nhận thông báo nếu chính sách sản phẩm yêu cầu.
+
+
+## 5. Yêu cầu an toàn UGC cho store release
+
+Vì TrustBite có review/nội dung do người dùng tạo, bản public beta/production phải có đủ cơ chế tối thiểu sau:
+
+| Cơ chế | Yêu cầu MVP | Owner |
+|---|---|---|
+| Lọc nội dung | Từ cấm/spam pattern/rate limit trước hoặc ngay sau khi submit; case nghi ngờ vào queue. | Backend / Moderation Ops |
+| Báo cáo nội dung | Người dùng/chủ quán báo cáo review từ màn hình liên quan, chọn reason code và mô tả. | Mobile / Backend |
+| Chặn người dùng | Người dùng có thể chặn hoặc hạn chế tương tác với người dùng lạm dụng trong phạm vi TrustBite. | Mobile / Backend |
+| Kênh liên hệ | Có email/form support cho vấn đề nội dung, an toàn, privacy và khiếu nại. | Ops / Legal |
+| SLA xử lý | Nội dung gây hại nghiêm trọng phải được triage nhanh; beta cần lịch trực rõ. | Ops Lead |
+
+## 6. Khiếu nại và khôi phục
+
+- Người dùng/chủ quán có thể liên hệ support nếu cho rằng quyết định kiểm duyệt sai.
+- Khôi phục nội dung chỉ thực hiện khi có reason và audit log.
+- Siêu quản trị có quyền override theo chính sách, nhưng mọi override phải nêu lý do và không xóa dấu vết audit.

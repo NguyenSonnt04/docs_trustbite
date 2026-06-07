@@ -1,5 +1,15 @@
 # Yêu cầu wireframe - TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | Wireframe requirements |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | UX |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 Tài liệu này mô tả thành phần bắt buộc ở mức wireframe. Chưa chốt màu sắc, spacing, typography, icon, layout chi tiết hoặc visual identity.
 
 ## 1. Trang chủ / Bản đồ

@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Kế hoạch kiểm thử |
-| Phiên bản | v2.1.0 |
+| Phiên bản | v1.1.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | Trưởng nhóm QA |
 | Ngày cập nhật | 2026-06-07 |
@@ -26,12 +26,12 @@
 | Hóa đơn/OCR | File hợp lệ, sai định dạng, quá dung lượng, hóa đơn rõ/mờ/sai quán/quá hạn |
 | GPS | Trong bán kính, ngoài bán kính, không cấp quyền, độ chính xác thấp |
 | Chống gian lận | Hóa đơn trùng, OCR không khớp, ngưỡng điểm rủi ro, cờ gian lận |
-| Chủ quán | Gửi claim quán, claim trùng, cập nhật thông tin, phản hồi đánh giá |
-| Quản trị viên | Duyệt/từ chối hóa đơn, duyệt quán, xử lý báo cáo, ghi audit log |
+| Chủ quán | MVP chỉ kiểm thử claim tối thiểu/manual nếu feature flag bật; portal đầy đủ P1 |
+| Quản trị viên | Dashboard, receipt queue, case detail, duyệt/từ chối/mark reference, moderation queue, claim tối thiểu, audit log |
 | Kiểm duyệt | Người dùng báo cáo, chủ quán báo cáo, quản trị viên xử lý, ẩn đánh giá |
 | Quyền riêng tư | Xóa tài khoản, xóa/ẩn ảnh hóa đơn, che dữ liệu nhạy cảm |
 | Mobile app | iOS/Android auth, search, review, receipt upload, GPS permission, network weak, secure storage |
-| Thông báo | Tạo thông báo sau quyết định của quản trị viên |
+| Thông báo | MVP không bắt buộc notification; kiểm thử polling/refetch trạng thái. Notification test là P1 nếu feature flag bật. |
 | Hiệu năng | Tìm kiếm, tải bản đồ, tải hóa đơn, hàng đợi OCR, mobile crash/error rate |
 
 ---
@@ -55,7 +55,9 @@
 - Môi trường kiểm thử sẵn sàng.
 - Có tài khoản kiểm thử cho người dùng, chủ quán, quản trị viên và siêu quản trị.
 - Có mock OCR hoặc bộ ảnh hóa đơn kiểm thử.
-- Có dữ liệu seed cho quán.
+- Có dữ liệu seed cho quán và trạng thái theo `06_Database_Design/Migration_and_Seed_Plan.md`.
+- OpenAPI P0 baseline đã được review và contract test cơ bản chạy được.
+- Quy trình ghi nhận lỗi dùng `Bug_Report_Template.md` để thống nhất severity/priority và dữ liệu evidence được masking.
 
 ---
 
@@ -65,8 +67,11 @@
 - Không còn lỗi blocker hoặc critical.
 - Ít nhất 95% test case P1 đạt hoặc có waiver từ PO.
 - Các case bắt buộc về audit log của quản trị viên đạt.
+- Contract test xác nhận API không trả enum ngoài `Status_Mapping.md`/`openapi.yaml`.
+- Kiểm thử idempotency upload hóa đơn đạt theo `Idempotency_and_Retry_Design.md`.
 - Kiểm thử bảo mật tải file và giới hạn tần suất đạt.
 - UAT sign-off cho các luồng MVP cốt lõi.
+- Tất cả bug blocker/critical đã đóng hoặc có waiver rõ ràng từ PO/Engineering/QA nếu không chặn beta.
 
 ---
 
@@ -102,6 +107,18 @@
 - Khi: người dùng gửi bình luận dưới 50 ký tự.
 - Kết quả: hệ thống trả lỗi validate.
 
+### REV-TC-003: Người dùng bỏ qua xác minh hóa đơn
+
+- Bối cảnh: review hợp lệ đang ở trạng thái SUBMITTED.
+- Khi: người dùng chọn bỏ qua upload hóa đơn.
+- Kết quả: review chuyển REFERENCE_ONLY và mobile hiển thị nhãn tham khảo.
+
+### REV-TC-004: Review quá hạn upload hóa đơn
+
+- Bối cảnh: review SUBMITTED không có receipt sau 24 giờ.
+- Khi: job backend chạy.
+- Kết quả: review chuyển REFERENCE_ONLY; không tạo fraud flag.
+
 ### OCR-TC-001: Hóa đơn hợp lệ tự động xác minh
 
 - Bối cảnh: hóa đơn đúng định dạng, không trùng hash, OCR khớp tên quán từ 80%, thời gian trong 48 giờ và GPS trong 200m nếu có.
@@ -119,6 +136,18 @@
 - Bối cảnh: độ tương đồng tên quán từ OCR là 60-79%.
 - Khi: điểm rủi ro được tính xong.
 - Kết quả: case chuyển PENDING_ADMIN_REVIEW nếu tổng rủi ro nằm trong ngưỡng 31-60.
+
+### OCR-TC-004: Idempotency upload hóa đơn
+
+- Bối cảnh: mobile upload receipt thành công nhưng mất mạng trước khi nhận response.
+- Khi: mobile retry cùng `Idempotency-Key` và cùng payload.
+- Kết quả: API trả receiptVerificationId cũ, không tạo bản ghi receipt trùng.
+
+### OCR-TC-005: Idempotency conflict
+
+- Bối cảnh: một `Idempotency-Key` đã dùng cho receipt upload.
+- Khi: mobile gửi lại cùng key nhưng payload khác.
+- Kết quả: API trả `409 IDEMPOTENCY_CONFLICT`.
 
 ### GPS-TC-001: Không cấp GPS
 
@@ -138,6 +167,24 @@
 - Khi: quản trị viên từ chối với lý do.
 - Kết quả: hóa đơn REJECTED, đánh giá chuyển REFERENCE_ONLY hoặc REJECTED theo quyết định và audit log được ghi.
 
+### ADM-TC-003: Quản trị viên thiếu reason
+
+- Bối cảnh: case đang ở trạng thái PENDING_ADMIN_REVIEW.
+- Khi: quản trị viên gửi quyết định không có reason.
+- Kết quả: API trả `ADMIN_REASON_REQUIRED`; trạng thái không đổi; không ghi audit decision thành công.
+
+### ADM-TC-004: Receipt queue và case detail
+
+- Bối cảnh: có nhiều receipt case với risk/status khác nhau.
+- Khi: quản trị viên lọc theo status/risk và mở case detail.
+- Kết quả: queue trả đúng dữ liệu; case detail hiển thị review summary, receipt evidence, OCR, GPS, risk breakdown và audit history; dữ liệu nhạy cảm được masked.
+
+### ADM-TC-005: Case đã đóng không xử lý lại
+
+- Bối cảnh: receipt case đã VERIFIED/REJECTED bởi admin.
+- Khi: admin thường gửi decision lần nữa.
+- Kết quả: API từ chối; chỉ super admin override theo rule mới được phép.
+
 ### MOD-TC-001: Người dùng báo cáo đánh giá
 
 - Bối cảnh: đánh giá đang hiển thị.
@@ -156,10 +203,10 @@
 
 | ID | Kịch bản | Kết quả mong đợi |
 |---|---|---|
-| MERCH-TC-001 | Chủ quán gửi claim quán đủ giấy tờ | Claim chuyển SUBMITTED/PENDING_ADMIN_REVIEW |
-| MERCH-TC-002 | Chủ quán claim quán đã có owner | Hệ thống báo xung đột hoặc chuyển sang tranh chấp chờ xử lý |
-| MERCH-TC-003 | Chủ quán phản hồi đánh giá | Phản hồi hiển thị nếu chủ quán đã được xác minh |
-| NOTIF-TC-001 | Quản trị viên xử lý báo cáo | Người báo cáo nhận thông báo |
+| MERCH-TC-001 | Chủ quán/admin gửi claim quán đủ giấy tờ nếu feature flag bật | Claim chuyển SUBMITTED/PENDING_ADMIN_REVIEW |
+| MERCH-TC-002 | Chủ quán/admin claim quán đã có owner | Hệ thống báo xung đột hoặc chuyển sang tranh chấp chờ xử lý |
+| MERCH-TC-003 | Chủ quán phản hồi đánh giá qua portal P1 | Phản hồi hiển thị nếu chủ quán đã được xác minh |
+| NOTIF-TC-001 | Quản trị viên xử lý báo cáo khi notification flag bật | Người báo cáo nhận thông báo, payload không chứa dữ liệu nhạy cảm |
 | VOTE-TC-001 | Người dùng bình chọn hữu ích | Bình chọn được lưu và không bị trùng |
 | FAV-TC-001 | Người dùng lưu quán yêu thích | Quán yêu thích được lưu và danh sách yêu thích cập nhật |
 
@@ -174,6 +221,7 @@
 | Request tải hóa đơn | p95 < 3s, OCR xử lý bất đồng bộ |
 | Xử lý hàng đợi OCR | Theo SLA của nhà cung cấp, phải retry khi timeout |
 | Danh sách hàng đợi quản trị | p95 < 1.5s |
+| Refetch trạng thái receipt/review | p95 < 1s với dataset MVP |
 
 ---
 
@@ -185,6 +233,9 @@
 - GPS trong 100m, 300m, 1km, không có GPS, độ chính xác thấp.
 - Đánh giá ở các trạng thái VERIFIED/REFERENCE_ONLY/PENDING_ADMIN_REVIEW/HIDDEN/DELETED.
 - Device matrix và mobile permission cases theo `Mobile_Test_Plan.md` và `Device_Test_Matrix.md`.
+- Idempotency keys hợp lệ/trùng/conflict/request in progress/expired.
+- Admin cases ở trạng thái open/closed/overdue, có/không OCR, có/không GPS, signed URL hết hạn.
+- Test fixture bao phủ mọi dòng P0 trong `00_Document_Control/Traceability_Matrix.md` và `02_Business_Analysis/Status_Mapping.md`.
 
 ---
 

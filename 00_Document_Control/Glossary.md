@@ -1,5 +1,15 @@
 # Bảng thuật ngữ - TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | Glossary / bảng thuật ngữ |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | BA |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 | Thuật ngữ | Định nghĩa |
 |---|---|
 | Đánh giá đã xác minh | Đánh giá có bằng chứng đủ tin cậy, thường thông qua xác minh hóa đơn và điểm rủi ro thấp hoặc được quản trị viên duyệt. |

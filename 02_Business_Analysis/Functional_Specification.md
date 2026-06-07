@@ -268,3 +268,72 @@ Người dùng đã đăng ký, chủ quán, quản trị viên.
 
 ### Tiêu chí nghiệm thu
 - Bối cảnh báo cáo hợp lệ, khi gửi, thì báo cáo chuyển SUBMITTED.
+
+---
+
+## PRIV-001: Xóa tài khoản và dữ liệu
+
+### Mục tiêu
+Cho phép người dùng tự khởi tạo xóa tài khoản trong app và qua web link/form công khai, đồng thời giữ khả năng audit/fraud trong giới hạn retention.
+
+### Tác nhân
+Người dùng đã đăng ký, hệ thống, CS/Ops nếu xử lý yêu cầu web.
+
+### Điều kiện tiên quyết
+- Người dùng đã đăng nhập trong app hoặc xác minh danh tính qua web deletion form.
+- Privacy Policy và Data Retention Policy đã công khai.
+
+### Dữ liệu vào
+- User ID hoặc thông tin xác minh qua web form.
+- Confirmation token/text.
+- Reason tùy chọn.
+
+### Luồng chính
+1. Người dùng mở Settings > Account > Delete account.
+2. Mobile hiển thị hậu quả: mất hồ sơ, review có thể bị ẩn danh, dữ liệu audit/fraud có thể giữ giới hạn.
+3. Người dùng xác nhận.
+4. Backend tạo `account_deletion_requests`, revoke session và chuyển user sang `DELETION_REQUESTED`.
+5. Job xử lý xóa/ẩn danh hóa dữ liệu theo retention.
+6. Hệ thống ghi audit log tối thiểu và trả trạng thái xử lý.
+
+### Quy tắc nghiệp vụ
+- Không được chỉ mở email support; app phải có hành động trong app.
+- Web deletion link/form phải hoạt động cho người dùng không thể đăng nhập.
+- Dữ liệu chống gian lận/audit có thể giữ theo `Data_Retention_Policy.md`, nhưng không được dùng cho marketing.
+
+### Tiêu chí nghiệm thu
+- Bối cảnh người dùng đăng nhập, khi xác nhận xóa tài khoản, thì deletion request được tạo và token bị revoke.
+- Bối cảnh yêu cầu xóa hoàn tất, khi kiểm tra hồ sơ, thì dữ liệu cá nhân đã bị xóa/ẩn danh hóa theo policy.
+
+---
+
+## SAFETY-001: Block user và an toàn UGC
+
+### Mục tiêu
+Bổ sung khả năng người dùng báo cáo/block user hoặc nội dung lạm dụng để đáp ứng yêu cầu UGC safety khi phát hành store.
+
+### Tác nhân
+Người dùng đã đăng ký, chủ quán, quản trị viên.
+
+### Điều kiện tiên quyết
+- Review/user mục tiêu tồn tại.
+- Tác nhân đã đăng nhập nếu tạo report/block.
+
+### Dữ liệu vào
+- `targetUserId` hoặc `reviewId`.
+- `reasonCode`, mô tả tùy chọn.
+
+### Luồng chính
+1. Người dùng chọn report hoặc block từ review/user menu.
+2. Hệ thống validate quyền và chống spam report trùng.
+3. Report đi vào moderation queue; block có hiệu lực ngay trên feed/danh sách review.
+4. Admin xử lý report nếu cần.
+
+### Quy tắc nghiệp vụ
+- Block không xóa nội dung khỏi hệ thống; chỉ ẩn/giảm hiển thị cho người block theo UX đã chốt.
+- Nội dung vi phạm chính sách vẫn cần moderation action riêng.
+- Hành động restrict/suspend user phải ghi audit log và reason.
+
+### Tiêu chí nghiệm thu
+- Bối cảnh user A block user B, khi A xem danh sách review, thì review của B bị ẩn hoặc hiển thị theo trạng thái “đã bị ẩn”.
+- Bối cảnh report hợp lệ, khi admin xử lý, thì trạng thái report/review/user cập nhật và audit log được tạo.

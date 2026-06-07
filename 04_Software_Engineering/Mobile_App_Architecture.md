@@ -3,8 +3,8 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Kiến trúc mobile app |
-| Phiên bản | v1.0.0 |
-| Trạng thái | Bản nháp |
+| Phiên bản | v1.1.0 |
+| Trạng thái | Đang rà soát |
 | Chủ sở hữu | Mobile Lead / Kiến trúc sư trưởng |
 | Ngày cập nhật | 2026-06-07 |
 
@@ -49,7 +49,7 @@ Flutter + Dart được chấp nhận nếu team có năng lực Flutter tốt h
 - Mobile app không tự quyết định gian lận hoặc trạng thái xác minh. Backend là nguồn sự thật.
 - Mọi token nhạy cảm phải lưu trong secure storage.
 - GPS, camera, photo library và notification phải có consent rõ ràng.
-- Upload hóa đơn phải có trạng thái rõ: chưa chọn file, đang tải, đã tải, đang xử lý OCR, chờ admin, verified, reference only, rejected.
+- Upload hóa đơn MVP dùng multipart API kèm `Idempotency-Key` và phải có trạng thái rõ: chưa chọn file, đang tải, đã tải, đang xử lý OCR, chờ admin, verified, reference only, rejected.
 - Mọi lỗi P0 phải có thông báo người dùng hiểu được và có mã kỹ thuật để support tra cứu.
 - App phải hoạt động được trong điều kiện mạng yếu, ít nhất bằng retry/refetch và thông báo trạng thái đúng.
 
@@ -122,7 +122,7 @@ Yêu cầu tối thiểu:
 - Chuẩn hóa error response theo `API_Specification.md`.
 - Timeout mặc định cho request thường và timeout riêng cho upload.
 - Retry có kiểm soát cho GET/refetch, không retry bừa bãi cho mutation tạo dữ liệu.
-- Idempotency key cho upload/tạo review nếu backend hỗ trợ.
+- Idempotency key bắt buộc cho upload hóa đơn và khuyến nghị cho tạo review.
 
 ---
 
@@ -133,9 +133,12 @@ Mobile app phải hỗ trợ:
 - Chọn ảnh từ photo library.
 - Chụp ảnh bằng camera nếu được cấp quyền.
 - Hỗ trợ JPG, PNG, HEIC theo rule backend.
+- Gửi multipart `POST /receipts` kèm `Idempotency-Key` UUID v4.
 - Hiển thị dung lượng tối đa 10MB.
 - Kiểm tra sơ bộ dung lượng trước upload.
 - Không chỉnh sửa ảnh theo cách làm sai hash nếu backend yêu cầu hash file gốc. Nếu có nén ảnh, backend/API phải định nghĩa rõ hash tính trên bản nào.
+- Retry upload với cùng payload phải dùng lại cùng `Idempotency-Key`; nếu người dùng chọn file khác phải tạo key mới.
+- Cho phép người dùng bỏ qua xác minh hóa đơn để review chuyển `REFERENCE_ONLY`.
 - Cho phép người dùng từ chối GPS.
 - Hiển thị trạng thái xử lý OCR bất đồng bộ.
 - Cho phép refetch trạng thái sau khi app quay lại foreground.
