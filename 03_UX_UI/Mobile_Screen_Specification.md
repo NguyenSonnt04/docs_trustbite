@@ -3,8 +3,8 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Mobile screen specification |
-| Phiên bản | v1.0.0 |
-| Trạng thái | Bản nháp |
+| Phiên bản | v1.1.0 |
+| Trạng thái | Đang rà soát |
 | Chủ sở hữu | UX Lead / Product Manager |
 | Ngày cập nhật | 2026-06-07 |
 
@@ -40,7 +40,17 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | Loading restaurants, no result, map permission denied, API error. |
 | Analytics | `restaurant_search_performed`, `restaurant_detail_viewed`. |
 
-### MOB-002: Restaurant Detail
+
+### MOB-002: Search Results
+
+| Nhóm | Yêu cầu |
+|---|---|
+| Mục tiêu | Người dùng xem kết quả tìm kiếm theo từ khóa, vị trí hoặc filter. |
+| Thành phần | Search query, filter chips, sort, restaurant cards, no-result suggestion, map/list transition. |
+| State | Loading, no result, location permission denied, API error, retry. |
+| Analytics | `restaurant_search_performed`, `restaurant_filter_changed`, `restaurant_detail_viewed`. |
+
+### MOB-003: Restaurant Detail
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -49,7 +59,7 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | Restaurant not found, suspended/closed, reviews empty, reviews loading. |
 | Trust UX | Phải giải thích được khác biệt giữa Verified và Reference trong ngôn ngữ ngắn, dễ hiểu. |
 
-### MOB-003: OTP Request / Verify
+### MOB-004: OTP Request / Verify
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -58,7 +68,7 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | OTP sent, OTP expired, wrong OTP, rate limited, network error. |
 | Security | Không hiển thị OTP trong log/debug UI. |
 
-### MOB-004: Write Review
+### MOB-005: Write Review
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -67,7 +77,7 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | Draft, validation error, submitting, submit failed, submitted. |
 | Validation | Rating 1-5, comment tối thiểu 50 ký tự, restaurant ACTIVE. |
 
-### MOB-005: Receipt Upload
+### MOB-006: Receipt Upload
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -76,7 +86,7 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | Permission denied, file too large, unsupported type, uploading, upload failed, uploaded. |
 | Privacy | Nói rõ ảnh gốc lưu riêng tư và GPS là tùy chọn. |
 
-### MOB-006: Verification Result
+### MOB-007: Verification Result
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -85,7 +95,7 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | State | Processing, verified, pending admin review, reference only, rejected. |
 | Copy | Không dùng ngôn ngữ đổ lỗi; giải thích vì sao có thể cần admin rà soát. |
 
-### MOB-007: Profile Overview
+### MOB-008: Profile Overview
 
 | Nhóm | Yêu cầu |
 |---|---|
@@ -93,21 +103,27 @@ Mỗi màn hình có dữ liệu từ API phải có:
 | Thành phần | Display name, avatar, rank, EXP, review history, settings link. |
 | State | Not logged in, loading, API error, no reviews. |
 
-### MOB-008: Report Review
+### MOB-009: Report Review / Block User
 
 | Nhóm | Yêu cầu |
 |---|---|
-| Mục tiêu | Người dùng báo cáo đánh giá vi phạm. |
-| Thành phần | Reason selector, description, evidence optional P1, submit CTA. |
-| State | Submitted, duplicate report, validation error, API error. |
+| Mục tiêu | Người dùng báo cáo đánh giá/nội dung vi phạm và hạn chế tương tác từ người dùng lạm dụng. |
+| Thành phần | Reason selector, description, evidence optional P1, submit CTA, block user toggle/action sheet, link chính sách cộng đồng. |
+| State | Submitted, duplicate report, validation error, API error, blocked, already blocked. |
+| Safety | Không yêu cầu người báo cáo tự liên hệ người bị báo cáo; copy phải nêu TrustBite sẽ rà soát theo chính sách. |
+| API | `POST /moderation/reports`, `POST /users/{userId}/block`, `DELETE /users/{userId}/block`. |
 
-### MOB-009: Account Settings
+### MOB-010: Account Settings and Privacy
 
 | Nhóm | Yêu cầu |
 |---|---|
-| Mục tiêu | Người dùng quản lý tài khoản và quyền riêng tư cơ bản. |
-| Thành phần | Edit profile, logout, delete account request, privacy links, permission explanation. |
-| State | Save failed, logout failed, delete request submitted. |
+| Mục tiêu | Người dùng quản lý tài khoản, quyền riêng tư và yêu cầu xóa tài khoản/dữ liệu. |
+| Thành phần | Edit profile, logout, delete account entry, privacy policy link, terms link, data deletion web link, permission explanation, blocked users list P1 nếu cần. |
+| State | Save failed, logout failed, delete confirmation, delete request submitted, deletion pending, request already exists, API error. |
+| Delete account UX | Trước khi gửi yêu cầu, hiển thị hậu quả: logout khỏi thiết bị, ẩn/xóa PII theo retention, review có thể bị xóa/ẩn danh hóa, audit/fraud/legal records có thể giữ tối thiểu. |
+| Confirmation | Yêu cầu hành động xác nhận rõ ràng, ví dụ tick checkbox hoặc nhập `XÓA TÀI KHOẢN`; không đặt CTA xóa ở vị trí dễ bấm nhầm. |
+| Store compliance | Luồng trong app phải hoạt động cho mọi người dùng có tài khoản; link web deletion phải mở được ngoài app. |
+| API | `POST /users/me/deletion-request`, `GET /users/me/deletion-request`, `POST /users/me/deletion-request/cancel` nếu có grace period. |
 
 ---
 

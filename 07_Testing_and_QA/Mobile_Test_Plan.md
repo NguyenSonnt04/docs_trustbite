@@ -3,8 +3,8 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Mobile test plan |
-| Phiên bản | v1.0.0 |
-| Trạng thái | Bản nháp |
+| Phiên bản | v1.1.0 |
+| Trạng thái | Đang rà soát |
 | Chủ sở hữu | QA Lead / Mobile Lead |
 | Ngày cập nhật | 2026-06-07 |
 
@@ -29,6 +29,9 @@
 | Network | Offline, mạng yếu, timeout, app foreground/background |
 | Privacy | Không hiển thị hóa đơn gốc public, copy GPS tùy chọn, permission theo ngữ cảnh |
 | Security | Token secure storage, không log OTP/token, logout xóa session local |
+| Account deletion | Delete account entry, confirmation, request status, logout/session revoke, web deletion link |
+| UGC safety | Report review, block user, unblock user, duplicate report handling |
+| Store permissions | Camera/photo/location chỉ hỏi theo ngữ cảnh; Android Photo Picker nếu đủ core use case |
 | Accessibility | VoiceOver/TalkBack label cơ bản cho P0 screens |
 
 ---
@@ -121,3 +124,28 @@
 - Upload hóa đơn đạt trên cả iOS và Android.
 - GPS denied không chặn flow.
 - Accessibility cơ bản cho màn hình P0 đạt.
+
+
+### MOB-PRIV-001: Yêu cầu xóa tài khoản trong app
+
+- Bối cảnh: người dùng đã đăng nhập.
+- Khi: mở Account Settings, chọn xóa tài khoản, đọc hậu quả, xác nhận chủ động và gửi yêu cầu.
+- Kết quả: app hiển thị trạng thái request, không crash, token/session được xử lý theo API, người dùng hiểu cách theo dõi hoặc liên hệ support.
+
+### MOB-PRIV-002: Web deletion link
+
+- Bối cảnh: người dùng ở màn Account Settings hoặc store metadata.
+- Khi: mở link/form xóa tài khoản ngoài app.
+- Kết quả: link hoạt động trên trình duyệt, không yêu cầu app đang cài, copy nhất quán với Privacy Policy.
+
+### MOB-SAFETY-001: Báo cáo và chặn người dùng
+
+- Bối cảnh: người dùng thấy review vi phạm.
+- Khi: gửi report, thử report trùng cùng reason, chặn người dùng, bỏ chặn.
+- Kết quả: report hợp lệ tạo thành công, report trùng hiển thị copy rõ, block/unblock cập nhật UI và không ảnh hưởng review hợp lệ ngoài phạm vi block.
+
+### MOB-STORE-001: Permission theo ngữ cảnh
+
+- Bối cảnh: app mới cài.
+- Khi: mở app, tìm quán, chọn/chụp hóa đơn, chọn GPS.
+- Kết quả: app không hỏi camera/photo/location trước khi cần; từ chối quyền không làm crash; GPS denied vẫn xử lý được hóa đơn.

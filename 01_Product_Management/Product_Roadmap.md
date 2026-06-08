@@ -1,5 +1,15 @@
 # Lộ trình sản phẩm - TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | Product roadmap |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | PO |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 | Giai đoạn | Trọng tâm | Kết quả chính |
 |---|---|---|
 | Phase 0 | Nền tảng tài liệu | PRD v2, Functional Spec, Role Matrix, State Machines, API/DB/QA bản nháp |

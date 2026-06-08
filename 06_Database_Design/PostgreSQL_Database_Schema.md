@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Đặc tả schema cơ sở dữ liệu |
-| Phiên bản | v2.1.0 |
+| Phiên bản | v2.6.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | DBA / Kiến trúc sư hệ thống |
 | Ngày cập nhật | 2026-06-07 |
@@ -35,6 +35,8 @@ CREATE TABLE users (
   exp_points INTEGER NOT NULL DEFAULT 0,
   rank_code VARCHAR(50) NOT NULL DEFAULT 'NEWBIE',
   review_restricted_until TIMESTAMPTZ,
+  deletion_requested_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -174,6 +176,9 @@ CREATE TABLE reviews (
   comment TEXT NOT NULL,
   status VARCHAR(40) NOT NULL DEFAULT 'DRAFT',
   verification_status VARCHAR(40) NOT NULL DEFAULT 'UNVERIFIED',
+  trust_label VARCHAR(40) NOT NULL DEFAULT 'PENDING_VERIFICATION',
+  public_visibility VARCHAR(40) NOT NULL DEFAULT 'PRIVATE_UNTIL_DECISION',
+  trust_weight_bucket VARCHAR(20) NOT NULL DEFAULT 'NONE',
   visited_at TIMESTAMPTZ,
   hidden_reason TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -378,7 +383,31 @@ CREATE TABLE push_tokens (
 
 Ghi chú: push notification là P1. Không lưu raw token nếu không cần thiết cho provider integration; nếu cần raw token, phải mã hóa hoặc bảo vệ theo chính sách secret/data access.
 
-## 2.22. audit_logs - nhật ký kiểm toán
+## 2.22. idempotency_keys - khóa chống tạo trùng request
+
+```sql
+CREATE TABLE idempotency_keys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  idempotency_key UUID NOT NULL,
+  user_id UUID NOT NULL REFERENCES users(id),
+  endpoint VARCHAR(120) NOT NULL,
+  request_hash CHAR(64) NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'IN_PROGRESS',
+  response_status_code INTEGER,
+  response_body JSONB,
+  resource_type VARCHAR(60),
+  resource_id UUID,
+  locked_until TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, endpoint, idempotency_key)
+);
+```
+
+Ghi chú: bảng này bắt buộc cho `POST /receipts` và khuyến nghị cho `POST /reviews`. Xem `04_Software_Engineering/Idempotency_and_Retry_Design.md`.
+
+## 2.23. audit_logs - nhật ký kiểm toán
 
 ```sql
 CREATE TABLE audit_logs (
@@ -396,6 +425,44 @@ CREATE TABLE audit_logs (
 );
 ```
 
+## 2.24. account_deletion_requests - yêu cầu xóa tài khoản/dữ liệu
+
+```sql
+CREATE TABLE account_deletion_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  status VARCHAR(40) NOT NULL DEFAULT 'REQUESTED',
+  reason TEXT,
+  requested_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  scheduled_deletion_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  cancelled_at TIMESTAMPTZ,
+  retained_data_reason TEXT,
+  processed_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Ghi chú: chỉ cho phép một request mở trên mỗi user. Khi hoàn tất, phải revoke session/push token và xóa hoặc ẩn danh hóa PII theo `Data_Retention_Policy.md`.
+
+## 2.25. user_blocks - danh sách người dùng bị chặn
+
+```sql
+CREATE TABLE user_blocks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  blocker_user_id UUID NOT NULL REFERENCES users(id),
+  blocked_user_id UUID NOT NULL REFERENCES users(id),
+  reason_code VARCHAR(60),
+  source_review_id UUID REFERENCES reviews(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMPTZ,
+  UNIQUE(blocker_user_id, blocked_user_id)
+);
+```
+
+Ghi chú: không cho phép `blocker_user_id = blocked_user_id`. Soft delete bằng `deleted_at` nếu cần audit/bỏ chặn.
+
 ---
 
 ## 3. Chiến lược index
@@ -403,9 +470,13 @@ CREATE TABLE audit_logs (
 ```sql
 CREATE INDEX idx_users_phone_number ON users(phone_number);
 CREATE INDEX idx_user_sessions_user ON user_sessions(user_id, revoked_at);
+CREATE INDEX idx_account_deletion_requests_user_status ON account_deletion_requests(user_id, status);
+CREATE INDEX idx_user_blocks_blocker ON user_blocks(blocker_user_id, deleted_at);
+CREATE INDEX idx_user_blocks_blocked ON user_blocks(blocked_user_id, deleted_at);
 CREATE INDEX idx_restaurants_status ON restaurants(status);
 CREATE INDEX idx_restaurants_geo ON restaurants USING GIST(geo);
 CREATE INDEX idx_reviews_restaurant_status ON reviews(restaurant_id, status);
+CREATE INDEX idx_reviews_public_trust ON reviews(restaurant_id, public_visibility, trust_weight_bucket);
 CREATE INDEX idx_reviews_user_restaurant ON reviews(user_id, restaurant_id);
 CREATE UNIQUE INDEX idx_receipts_hash_unique ON receipt_verifications(file_hash_sha256);
 CREATE INDEX idx_receipts_review ON receipt_verifications(review_id);
@@ -416,6 +487,8 @@ CREATE INDEX idx_reports_status ON moderation_reports(status);
 CREATE INDEX idx_fraud_flags_entity ON fraud_flags(entity_type, entity_id);
 CREATE INDEX idx_notifications_recipient ON notifications(recipient_user_id, read_at);
 CREATE INDEX idx_push_tokens_user ON push_tokens(user_id, status);
+CREATE INDEX idx_idempotency_expires ON idempotency_keys(expires_at);
+CREATE INDEX idx_idempotency_resource ON idempotency_keys(resource_type, resource_id);
 CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
 ```
 
@@ -423,7 +496,7 @@ CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
 
 ## 4. Giá trị trạng thái
 
-Trạng thái chi tiết xem `02_Business_Analysis/State_Machines.md`. Database dùng varchar ở MVP để linh hoạt, sau khi ổn định có thể chuyển sang PostgreSQL enum.
+Trạng thái chi tiết xem `02_Business_Analysis/State_Machines.md` và mapping API/DB/UI xem `02_Business_Analysis/Status_Mapping.md`. Database dùng varchar ở MVP để linh hoạt, sau khi ổn định có thể chuyển sang PostgreSQL enum.
 
 ---
 
@@ -434,5 +507,8 @@ Trạng thái chi tiết xem `02_Business_Analysis/State_Machines.md`. Database 
 | `updated_at` trigger | Tự động cập nhật timestamp. |
 | Job tính lại điểm tin cậy | Chạy khi trạng thái đánh giá đổi sang VERIFIED/HIDDEN/DELETED. |
 | Job OCR hóa đơn bất đồng bộ | Xử lý OCR ngoài request chính. |
-| Job thông báo | Tạo thông báo sau quyết định của quản trị viên. |
+| Job hết hạn review chưa có receipt | Chuyển review `SUBMITTED` không có receipt sau 24 giờ sang `REFERENCE_ONLY`. |
+| Job dọn idempotency key | Xóa hoặc đánh dấu hết hạn key theo TTL trong `Idempotency_and_Retry_Design.md`. |
+| Job thông báo | P1/feature flag; MVP dùng refetch/polling. |
 | Job dọn dữ liệu retention | Xóa/ẩn dữ liệu theo `Data_Retention_Policy.md`. |
+| Job xử lý account deletion | Thực thi xóa/ẩn danh hóa PII, revoke session/push token và ghi audit cho `account_deletion_requests`. |

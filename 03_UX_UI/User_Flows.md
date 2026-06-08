@@ -1,5 +1,15 @@
 # Luồng người dùng - TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | User flows |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | UX / BA |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 Các luồng dưới đây ưu tiên mobile app cho người dùng cuối. Admin và merchant dùng web portal. Tài liệu chưa chốt layout/visual style.
 
 ## 1. Luồng đăng nhập
