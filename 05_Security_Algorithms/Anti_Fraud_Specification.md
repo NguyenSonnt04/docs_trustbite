@@ -32,13 +32,16 @@ Chống gian lận của MVP không dùng quy tắc cứng cho mọi trường h
 graph TD
     A[Người dùng tải hóa đơn] --> B[Kiểm tra định dạng/dung lượng file]
     B --> C[Lưu file riêng tư]
-    C --> D[Tính SHA-256 hash]
-    D --> E{Hash trùng?}
+    C --> D[Tính SHA-256 hash & Kiểm tra trùng file]
+    D --> E{Trùng SHA-256?}
     E -->|Có| R[Từ chối / cờ gian lận]
     E -->|Không| F[Xử lý OCR]
     F --> G[Đối chiếu tên quán]
     G --> H[Kiểm tra thời gian hóa đơn]
-    H --> I[Tín hiệu GPS tùy chọn]
+    H --> H1[Tính Composite Transaction Hash & Kiểm tra trùng]
+    H1 --> H2{Trùng dữ liệu?}
+    H2 -->|Có| R[Từ chối / cờ gian lận]
+    H2 -->|Không| I[Tín hiệu GPS tùy chọn]
     I --> J[Tính điểm rủi ro gian lận]
     J --> K{Quyết định}
     K -->|0-30| V[Tự động xác minh]
@@ -56,8 +59,8 @@ graph TD
 | Điều kiện | Điểm rủi ro |
 |---|---:|
 | GPS trong 200m | +0 |
-| GPS 200-500m | +20 |
-| GPS >500m | +40 |
+| GPS lệch >200m (khi gửi đánh giá tại quán trong vòng 1 giờ) | +40 |
+| GPS lệch >200m (khi gửi đánh giá từ xa/trễ sau 1 giờ) | +10 |
 | GPS không bật / người dùng không cấp quyền | +30 |
 | GPS accuracy >100m | +15 |
 | OCR tên quán khớp 80-100% | +0 |
@@ -68,7 +71,8 @@ graph TD
 | Hóa đơn 49-168 giờ | +40 |
 | Hóa đơn >168 giờ | +70 |
 | Không đọc được thời gian hóa đơn | +30 |
-| Hash ảnh trùng | +100 |
+| Hash ảnh trùng (SHA-256) | +100 |
+| Trùng thông tin giao dịch (Composite Hash) | +100 |
 | Ảnh sai định dạng/quá dung lượng | Reject trước scoring |
 | Metadata ảnh có dấu hiệu chỉnh sửa | +50 |
 | Người dùng mới tạo <24h và đánh giá đầu tiên | +15 |
@@ -129,13 +133,24 @@ Hệ thống nên chuẩn hóa trước khi so khớp:
 
 ---
 
-## 7. Hash hóa đơn trùng
+## 7. Chống trùng hóa đơn nhiều lớp
 
-- Tính SHA-256 trên file gốc hoặc chuẩn hóad binary tùy thiết kế backend.
-- Nếu hash đã tồn tại trong `receipt_verifications` với trạng thái không phải lỗi kỹ thuật, hóa đơn mới bị từ chối.
+### 7.1. Trùng lặp Hash file ảnh (SHA-256)
+- Tính SHA-256 trên file gốc. Nếu hash đã tồn tại trong `receipt_verifications` với trạng thái không phải lỗi kỹ thuật, hóa đơn mới bị từ chối tự động.
 - Tạo `fraud_flags` với loại `DUPLICATE_RECEIPT_HASH`.
 
-Quy tắc này được xem là quy tắc cứng trong MVP.
+### 7.2. Trùng lặp thông tin giao dịch (Composite Transaction Hash)
+- Chụp ảnh ở góc khác nhau sẽ làm thay đổi SHA-256 của file nhưng thông tin giao dịch vẫn giữ nguyên. Do đó, hệ thống sinh một khóa duy nhất sau khi OCR thành công:
+  $$\text{transaction\_unique\_hash} = \text{SHA256}(\text{normalized\_restaurant\_name} + \text{transaction\_datetime} + \text{invoice\_no} + \text{total\_amount})$$
+- Trong đó:
+  - `normalized_restaurant_name`: Tên quán đã được chuyển thường, loại bỏ dấu, khoảng trắng thừa và ký tự đặc biệt.
+  - `transaction_datetime`: Ngày giờ giao dịch được chuẩn hóa về định dạng ISO.
+  - `invoice_no`: Số hóa đơn hoặc mã giao dịch (mã định danh duy nhất trên hóa đơn).
+  - `total_amount`: Tổng số tiền thanh toán trên hóa đơn.
+- Nếu `transaction_unique_hash` trùng với hóa đơn đã được xác minh trước đó trong hệ thống, hóa đơn mới sẽ bị tự động từ chối.
+- Tạo `fraud_flags` với loại `DUPLICATE_TRANSACTION_HASH`.
+
+Quy tắc kiểm tra trùng hai lớp này được xem là quy tắc cứng trong MVP.
 
 ---
 
@@ -157,7 +172,8 @@ MVP chỉ nên làm kiểm tra nhẹ:
 
 ### MVP
 
-- Giới hạn tần suất OTP.
+- Giới hạn tần suất OTP: Tối đa 3 lần/10 phút cho mỗi số điện thoại. Sai 5 lần liên tiếp sẽ bị khóa tạm thời (Khóa 15 phút cho lần đầu, 24 giờ cho lần vi phạm tiếp theo).
+- Lưu trạng thái rate limit và danh sách khóa tạm thời (blacklisted phone numbers) trên Redis để truy xuất nhanh với độ trễ thấp.
 - Giới hạn tần suất đánh giá/tải hóa đơn.
 - Theo dõi IP/user-agent ở mức bảo mật cơ bản.
 - Ghi `fraud_flags` khi nhiều tài khoản đánh giá cùng quán với mẫu hành vi bất thường.

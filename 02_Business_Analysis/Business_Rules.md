@@ -6,7 +6,7 @@
 |---|---|---|
 | BR-AUTH-001 | OTP gồm 6 chữ số và hết hạn sau 120 giây. | P0 |
 | BR-AUTH-002 | Tối đa 3 lần gửi OTP trong 10 phút cho cùng số điện thoại. | P0 |
-| BR-AUTH-003 | Tối đa 5 lần nhập sai OTP trước khi khóa tạm thời. | P0 |
+| BR-AUTH-003 | Tối đa 5 lần nhập sai OTP trước khi khóa tạm thời (Khóa 15 phút cho lần đầu, 24 giờ nếu tiếp tục vi phạm trong ngày). | P0 |
 
 ## 2. Quy tắc quán
 
@@ -21,7 +21,7 @@
 | ID | Quy tắc | Mức ưu tiên |
 |---|---|---|
 | BR-REV-001 | Rating mỗi tiêu chí từ 1 đến 5. | P0 |
-| BR-REV-002 | Comment tối thiểu 50 ký tự. | P0 |
+| BR-REV-002 | Comment tối thiểu 30 ký tự cho đánh giá thông thường (Reference) và 50 ký tự cho đánh giá muốn xác minh (Verified). | P0 |
 | BR-REV-003 | Người dùng bị restricted không được viết review. | P0 |
 | BR-REV-004 | Chủ quán không được đánh giá quán của mình. | P0 |
 | BR-REV-005 | Đánh giá HIDDEN/DELETED không hiển thị công khai và không tính trust score. | P0 |
@@ -32,7 +32,7 @@
 |---|---|---|
 | BR-OCR-001 | Hóa đơn file chỉ nhận JPG, PNG, HEIC. | P0 |
 | BR-OCR-002 | File tối đa 10MB. | P0 |
-| BR-OCR-003 | Hash trùng bị reject/fraud flag. | P0 |
+| BR-OCR-003 | Trùng SHA-256 hash của ảnh HOẶC trùng thông tin giao dịch (Composite Transaction Hash) bị tự động từ chối và ghi cờ gian lận. | P0 |
 | BR-OCR-004 | OCR/GPS dùng risk scoring, không dùng rule cứng ngoại trừ duplicate hash. | P0 |
 | BR-OCR-005 | Hóa đơn nên trong 48 giờ; quá hạn tăng risk. | P0 |
 

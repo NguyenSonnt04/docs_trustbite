@@ -54,7 +54,7 @@ VERIFIED / REFERENCE_ONLY / PENDING_ADMIN_REVIEW / REJECTED
 
 ```text
 UPLOADED
-→ HASH_CHECKING
+→ DUPLICATE_CHECKING
   → DUPLICATE_DETECTED
       → REJECTED
   → OCR_PROCESSING
@@ -71,11 +71,11 @@ UPLOADED
 | Trạng thái | Ý nghĩa |
 |---|---|
 | UPLOADED | File đã được lưu riêng tư. |
-| HASH_CHECKING | Đang tính/kiểm tra hash. |
+| DUPLICATE_CHECKING | Đang kiểm tra trùng lặp (SHA-256 ảnh và Composite Transaction Hash). |
 | OCR_PROCESSING | Đang OCR. |
 | OCR_SUCCESS | OCR hoàn tất. |
 | OCR_FAILED | OCR lỗi kỹ thuật hoặc không đọc được. |
-| DUPLICATE_DETECTED | Hash trùng. |
+| DUPLICATE_DETECTED | Trùng file hash hoặc trùng khóa thông tin giao dịch (Composite Hash). |
 | VERIFIED | Hóa đơn đã xác minh. |
 | PENDING_ADMIN_REVIEW | Cần quản trị viên rà soát. |
 | REFERENCE_ONLY | Không đủ xác minh, nhưng review có thể giữ dạng tham khảo theo rule. |
@@ -164,6 +164,6 @@ REVIEW_RESTRICTED
 - Đánh giá `VERIFIED` có thể chuyển `HIDDEN` nếu vi phạm nội dung.
 - `HIDDEN`, `REJECTED` và `DELETED` không tính điểm tin cậy.
 - Hóa đơn `REJECTED` không được chuyển `VERIFIED` trừ khi siêu quản trị override.
-- `DUPLICATE_DETECTED` phải tạo fraud flag loại `DUPLICATE_RECEIPT_HASH`.
+- `DUPLICATE_DETECTED` phải tạo fraud flag loại `DUPLICATE_RECEIPT_HASH` hoặc `DUPLICATE_TRANSACTION_HASH`.
 - Mọi chuyển trạng thái do quản trị viên thực hiện phải ghi audit log.
 - Mobile app phải refetch trạng thái từ API khi app quay lại foreground hoặc người dùng mở lại màn hình kết quả xác minh.
