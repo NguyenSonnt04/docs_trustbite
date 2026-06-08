@@ -1,5 +1,15 @@
 # Chân dung người dùng - TrustBite
 
+| Thông tin tài liệu | Chi tiết |
+|---|---|
+| Loại tài liệu | User personas |
+| Phiên bản | v2.6.0 |
+| Trạng thái | Đang rà soát |
+| Chủ sở hữu | PO / UX |
+| Ngày cập nhật | 2026-06-07 |
+
+---
+
 ## 1. Khách chưa đăng nhập
 
 - Muốn xem quán và đánh giá trước khi đăng ký.

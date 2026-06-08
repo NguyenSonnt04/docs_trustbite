@@ -3,8 +3,8 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | API contract guidelines |
-| Phiên bản | v1.0.0 |
-| Trạng thái | Bản nháp |
+| Phiên bản | v1.1.0 |
+| Trạng thái | Đang rà soát |
 | Chủ sở hữu | Backend Lead / Mobile Lead |
 | Ngày cập nhật | 2026-06-07 |
 
@@ -21,13 +21,13 @@ API của TrustBite phải đủ rõ để mobile, admin web, backend và QA là
 | Nhóm | Quy ước |
 |---|---|
 | Base URL | `/api/v1` |
-| Format | JSON UTF-8, riêng upload dùng multipart hoặc signed URL flow |
+| Format | JSON UTF-8, riêng upload hóa đơn MVP dùng multipart; signed URL là P1 khi cần scale |
 | ID | UUID |
 | Time | ISO-8601 kèm timezone |
 | Auth | Bearer access token, refresh/session token theo auth strategy |
 | Pagination | `page`, `pageSize`, `total` cho MVP; cursor có thể dùng khi dữ liệu lớn |
 | Error | Một format duy nhất cho toàn API |
-| Idempotency | Bắt buộc cho mutation có rủi ro tạo trùng nếu mobile retry |
+| Idempotency | Bắt buộc cho mutation có rủi ro tạo trùng nếu mobile retry, tối thiểu `POST /receipts` và khuyến nghị cho `POST /reviews` |
 
 ---
 
@@ -95,38 +95,36 @@ Error code phải ổn định để mobile mapping sang copy/localization.
 | `CLAIM_CONFLICT` | Claim quán xung đột |
 | `REPORT_DUPLICATE` | Báo cáo trùng |
 | `PROVIDER_UNAVAILABLE` | OCR/SMS/provider ngoài lỗi tạm thời |
+| `IDEMPOTENCY_KEY_REQUIRED` | Thiếu Idempotency-Key ở endpoint bắt buộc |
+| `IDEMPOTENCY_KEY_INVALID` | Idempotency-Key sai định dạng |
+| `IDEMPOTENCY_CONFLICT` | Idempotency key được dùng lại với payload khác |
+| `REQUEST_IN_PROGRESS` | Request cùng idempotency key đang xử lý |
+| `REVIEW_VERIFICATION_EXPIRED` | Review SUBMITTED đã quá hạn upload và chuyển REFERENCE_ONLY |
+| `ADMIN_REASON_REQUIRED` | Quyết định admin thiếu reason |
 
 ---
 
 ## 6. Upload hóa đơn
 
-MVP có thể chọn một trong hai flow, nhưng phải chốt trước implementation.
-
-### Phương án A: Multipart API
+MVP chốt dùng **multipart API** để giảm độ phức tạp mobile/backend trong beta.
 
 ```text
 POST /receipts
 Content-Type: multipart/form-data
+Idempotency-Key: <uuid-v4>
 ```
 
-Ưu điểm: đơn giản cho MVP. Nhược điểm: API chịu tải upload trực tiếp.
+Signed upload chuyển sang P1 khi có một trong các tín hiệu: upload timeout thường xuyên, chi phí API tăng, file lớn, hoặc cần tải trực tiếp vào object storage.
 
-### Phương án B: Signed upload
-
-```text
-POST /receipts/upload-intents
-PUT signedUrl
-POST /receipts/{id}/complete
-```
-
-Ưu điểm: scale tốt hơn. Nhược điểm: nhiều bước hơn, mobile implementation phức tạp hơn.
-
-### Quy tắc chung
+### Quy tắc multipart MVP
 
 - Backend luôn validate lại file type và size.
-- Mobile retry phải dùng idempotency key hoặc upload intent id.
+- Mobile retry bắt buộc gửi cùng `Idempotency-Key` cho cùng một intent upload.
+- Nếu cùng `Idempotency-Key` và cùng user/review được gửi lại, API trả lại receipt verification đã tạo thay vì tạo bản ghi mới.
+- Nếu cùng `Idempotency-Key` nhưng payload khác, API trả `409 IDEMPOTENCY_CONFLICT`.
 - API trả `202` nếu OCR xử lý bất đồng bộ.
 - Response phải có `receiptVerificationId`, `status`, `processingStatus` và polling endpoint.
+- Hash duplicate vẫn phải tạo fraud flag/audit system event; không chỉ trả lỗi DB unique constraint.
 
 ---
 
@@ -142,6 +140,8 @@ POST /receipts/{id}/complete
 
 ## 8. OpenAPI Definition of Done
 
+File OpenAPI chính thức đặt tại `04_Software_Engineering/openapi.yaml`. Tài liệu markdown có thể diễn giải nghiệp vụ, nhưng implementation và contract test phải bám theo OpenAPI đã review.
+
 Một endpoint chỉ được xem là sẵn sàng dev khi có:
 
 - request schema,
@@ -152,4 +152,7 @@ Một endpoint chỉ được xem là sẵn sàng dev khi có:
 - rate limit nếu có,
 - ví dụ request/response,
 - test case QA liên quan,
-- mapping tới user story/feature code.
+- mapping tới user story/feature code,
+- idempotency requirement cho mutation nếu có,
+- enum/status dùng chung với `State_Machines.md`,
+- quyết định side effect: audit log, fraud flag, notification/refetch.

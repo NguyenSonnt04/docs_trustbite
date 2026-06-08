@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Tài liệu yêu cầu sản phẩm |
-| Phiên bản | v2.0.0 |
+| Phiên bản | v2.6.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | Quản lý sản phẩm |
 | Ngày cập nhật | 2026-06-07 |
@@ -14,7 +14,7 @@
 
 TrustBite giúp người dùng chọn quán ăn dựa trên đánh giá có bằng chứng thực tế. MVP tập trung vào đánh giá đã xác minh bằng hóa đơn, trạng thái đánh giá minh bạch và quy trình quản trị đủ để xử lý trường hợp nghi vấn.
 
-Sản phẩm được định hướng **mobile-first**: người dùng cuối thao tác chính trên iOS/Android app; admin portal dùng web để xử lý vận hành; merchant portal thuộc P1/V1.1 nếu không cần sớm để kiểm chứng giả thuyết chủ quán.
+Sản phẩm được định hướng **mobile-first**: người dùng cuối thao tác chính trên iOS/Android app; admin portal dùng web để xử lý vận hành. Merchant portal đầy đủ thuộc P1/V1.1; trong MVP, giả thuyết chủ quán được kiểm chứng bằng admin/manual claim tối thiểu hoặc phỏng vấn vận hành, không chặn release MVP.
 
 ---
 
@@ -49,7 +49,7 @@ Sản phẩm được định hướng **mobile-first**: người dùng cuối t
 
 | Giai đoạn | Bao gồm |
 |---|---|
-| MVP | Mobile app người dùng: xác thực OTP, khám phá quán, đánh giá, xác minh hóa đơn, GPS tùy chọn, kết quả xác minh, hồ sơ/EXP; admin web: duyệt thủ công, kiểm duyệt, audit log |
+| MVP | Mobile app người dùng: xác thực OTP, khám phá quán, đánh giá, xác minh hóa đơn bằng multipart upload, GPS tùy chọn, kết quả xác minh, hồ sơ/EXP; admin web: duyệt thủ công, kiểm duyệt, audit log; merchant claim chỉ ở mức tối thiểu/manual nếu cần |
 | V1.1 | Cổng chủ quán chi tiết, thông báo, bình chọn hữu ích, danh sách yêu thích, điểm tin cậy nâng cao |
 | Tương lai | tóm tắt AI, nhiệm vụ bí mật, hoàn tiền, đồ thị hành vi AI, hạ tầng quy mô lớn |
 
@@ -135,9 +135,12 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - Quán phải ở trạng thái ACTIVE.
   - Người dùng bị khóa quyền đánh giá không được gửi đánh giá.
   - Chủ quán không được đánh giá quán mình sở hữu/claim.
-- Điều kiện lỗi: thiếu rating, comment quá ngắn (<30 ký tự cho reference, <50 ký tự cho verified), quán không ACTIVE, người dùng bị hạn chế.
+  - Người dùng có thể bỏ qua xác minh hóa đơn; khi bỏ qua, đánh giá chuyển `REFERENCE_ONLY`.
+  - Đánh giá `SUBMITTED` không có hóa đơn sau 24 giờ được job chuyển `REFERENCE_ONLY` để tránh trạng thái treo.
+- Điều kiện lỗi: thiếu rating, comment quá ngắn, quán không ACTIVE, người dùng bị hạn chế.
 - Tiêu chí nghiệm thu:
   - Bối cảnh người dùng gửi đánh giá hợp lệ, khi hệ thống lưu thành công, thì đánh giá có trạng thái SUBMITTED và nextStep là UPLOAD_RECEIPT hoặc SKIP_VERIFICATION.
+  - Bối cảnh người dùng chọn bỏ qua hóa đơn, khi xác nhận, thì đánh giá chuyển REFERENCE_ONLY và hiển thị nhãn tham khảo.
 
 ### OCR-001: Upload và xác minh hóa đơn
 
@@ -150,6 +153,7 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - ID đánh giá.
   - Vị trí GPS nếu người dùng cho phép.
 - Quy tắc nghiệp vụ:
+  - MVP dùng multipart upload qua `POST /receipts` kèm `Idempotency-Key` để xử lý retry từ mobile.
   - Định dạng hỗ trợ: JPG, PNG, HEIC.
   - Dung lượng tối đa: 10MB.
   - Hóa đơn nên nằm trong vòng 48 giờ so với thời điểm đánh giá.
@@ -247,8 +251,12 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 - Mục tiêu: Gửi thông báo khi có quyết định verification/report/claim.
 - Dữ liệu vào: loại sự kiện, recipientId, payload.
 - Dữ liệu ra: thông báoId.
+- Quy tắc MVP:
+  - Notification không chặn MVP.
+  - MVP dùng polling/refetch khi người dùng mở lại màn hình kết quả xác minh hoặc app quay lại foreground.
+  - Nếu module notification được bật bằng feature flag, thông báo phải tuân thủ privacy và không chứa dữ liệu nhạy cảm.
 - Tiêu chí nghiệm thu:
-  - Bối cảnh quản trị viên xử lý báo cáo, khi quyết định được lưu, thì người tạo report nhận thông báo.
+  - Bối cảnh quản trị viên xử lý báo cáo và notification feature flag bật, khi quyết định được lưu, thì người tạo report nhận thông báo.
 
 ### GAME-001: EXP và rank cơ bản
 
@@ -262,6 +270,39 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - Hệ thống xử lý cập nhật EXP và thăng/hạ rank bất đồng bộ (async). Mọi tác động recalculate trọng số của review do đổi rank người dùng sẽ được xử lý trong background job.
 - Tiêu chí nghiệm thu:
   - Bối cảnh đánh giá verified thành công, khi hệ thống cập nhật game hóa, thì người dùng được cộng EXP theo rule.
+
+
+### PRIV-001: Xóa tài khoản và dữ liệu
+
+- Tác nhân: Người dùng đã đăng ký
+- Mức ưu tiên: P0 trước public beta/production
+- Mục tiêu: Cho phép người dùng tự khởi tạo xóa tài khoản trong app và cung cấp web link/form xóa tài khoản/dữ liệu.
+- Dữ liệu vào: xác nhận người dùng, lý do tùy chọn, platform, request metadata.
+- Dữ liệu ra: deletionRequestId, trạng thái, scheduledDeletionAt hoặc completedAt.
+- Quy tắc nghiệp vụ:
+  - Không chỉ dùng email thủ công; mobile phải có luồng trong Settings > Account > Delete account.
+  - Backend phải xóa hoặc ẩn danh hóa dữ liệu cá nhân theo `Data_Retention_Policy.md`.
+  - Audit/fraud/security records có thể giữ trong thời hạn giới hạn nếu cần bảo vệ hệ thống hoặc nghĩa vụ pháp lý.
+  - Sau khi request được xác nhận, refresh/session token bị revoke; nếu có grace period, trạng thái tài khoản là `DELETION_REQUESTED`.
+- Tiêu chí nghiệm thu:
+  - Bối cảnh người dùng đăng nhập, khi xác nhận xóa tài khoản, thì API tạo deletion request, revoke session và mobile hiển thị trạng thái/ước tính xử lý.
+  - Bối cảnh người dùng chưa đăng nhập, khi mở web deletion link, thì có form xác minh danh tính và gửi request hợp lệ.
+
+### SAFETY-001: UGC report/block và liên hệ hỗ trợ
+
+- Tác nhân: Người dùng, Chủ quán, Quản trị viên
+- Mức ưu tiên: P0 trước public beta/production
+- Mục tiêu: Đáp ứng yêu cầu an toàn UGC của store và giảm lạm dụng cộng đồng.
+- Dữ liệu vào: reviewId/userId, reasonCode, mô tả, block target.
+- Dữ liệu ra: reportId, blockId hoặc trạng thái restrict.
+- Quy tắc nghiệp vụ:
+  - Review công khai phải có hành động “Báo cáo”.
+  - User public/author card nếu hiển thị phải có cách block hoặc ẩn nội dung từ user đó.
+  - Support/contact info phải hiển thị trong app hoặc trang hỗ trợ.
+  - Nội dung bị report nghiêm trọng phải vào moderation queue và có SLA xử lý.
+- Tiêu chí nghiệm thu:
+  - Bối cảnh người dùng báo cáo review/user, khi gửi hợp lệ, thì report vào admin queue.
+  - Bối cảnh người dùng block user khác, khi mở danh sách review, thì nội dung của user bị block không hiển thị hoặc được ẩn theo UX đã chốt.
 
 ### AI-001: Tóm tắt đánh giá bằng AI
 
@@ -288,3 +329,4 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 | Chặn hóa đơn trùng | 100% hash duplicate bị phát hiện |
 | Mức hiểu của người dùng về độ tin cậy | >= 70% người dùng hiểu khác biệt giữa Verified và Reference |
 | Critical bug rate | 0 blocker bug trước public beta |
+| Store readiness gate | 100% checklist App Store/Google Play P0 đạt trước public beta |

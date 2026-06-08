@@ -428,99 +428,69 @@ Người dùng đã đăng ký, chủ quán, quản trị viên.
 
 ---
 
-## NOTIF-001: Thông báo cơ bản
+## PRIV-001: Xóa tài khoản và dữ liệu
 
 ### Mục tiêu
-Thông báo cho người dùng, chủ quán hoặc quản trị viên khi có kết quả xử lý quan trọng liên quan đến xác minh, kiểm duyệt hoặc claim.
+Cho phép người dùng tự khởi tạo xóa tài khoản trong app và qua web link/form công khai, đồng thời giữ khả năng audit/fraud trong giới hạn retention.
 
 ### Tác nhân
-Người dùng đã đăng ký, chủ quán, quản trị viên, hệ thống.
+Người dùng đã đăng ký, hệ thống, CS/Ops nếu xử lý yêu cầu web.
 
 ### Điều kiện tiên quyết
-- Người nhận tồn tại và có quyền xem sự kiện liên quan.
-- Sự kiện nghiệp vụ đã được lưu thành công.
-- Payload thông báo không chứa dữ liệu nhạy cảm vượt quá quyền của người nhận.
+- Người dùng đã đăng nhập trong app hoặc xác minh danh tính qua web deletion form.
+- Privacy Policy và Data Retention Policy đã công khai.
 
 ### Dữ liệu vào
-- Loại sự kiện.
-- ID người nhận.
-- ID entity liên quan.
-- Tiêu đề và nội dung ngắn.
-- Payload điều hướng trong app/web nếu có.
+- User ID hoặc thông tin xác minh qua web form.
+- Confirmation token/text.
+- Reason tùy chọn.
 
 ### Luồng chính
-1. Hệ thống nhận sự kiện nghiệp vụ sau khi admin hoặc worker xử lý xong.
-2. Hệ thống xác định người nhận hợp lệ.
-3. Hệ thống tạo thông báo trong ứng dụng.
-4. Người nhận mở danh sách thông báo.
-5. Hệ thống hiển thị thông báo theo thứ tự mới nhất.
-6. Người nhận mở thông báo để đi tới màn hình liên quan.
-7. Người nhận có thể đánh dấu thông báo đã đọc.
+1. Người dùng mở Settings > Account > Delete account.
+2. Mobile hiển thị hậu quả: mất hồ sơ, review có thể bị ẩn danh, dữ liệu audit/fraud có thể giữ giới hạn.
+3. Người dùng xác nhận.
+4. Backend tạo `account_deletion_requests`, revoke session và chuyển user sang `DELETION_REQUESTED`.
+5. Job xử lý xóa/ẩn danh hóa dữ liệu theo retention.
+6. Hệ thống ghi audit log tối thiểu và trả trạng thái xử lý.
 
 ### Quy tắc nghiệp vụ
-- MVP ưu tiên thông báo trong ứng dụng; push notification và email/SMS có thể để V1.1 nếu chưa cần.
-- Không tạo thông báo nếu quyết định nghiệp vụ chưa lưu thành công.
-- Không đưa OTP, token, ảnh hóa đơn gốc, GPS gốc hoặc OCR text đầy đủ vào nội dung thông báo.
-- Người dùng chỉ nhận thông báo về entity mà họ có quyền xem.
-- Thông báo trạng thái xác minh phải dùng wording rõ giữa VERIFIED, REFERENCE_ONLY, PENDING_ADMIN_REVIEW và REJECTED.
-
-### Luồng thay thế
-- Người nhận không còn ACTIVE → hệ thống không gửi push, nhưng có thể lưu thông báo nội bộ theo policy.
-- Payload lỗi hoặc thiếu entity → không tạo thông báo và ghi log vận hành.
-- Người nhận không có quyền xem entity → hệ thống không tạo thông báo cho người đó.
-- Push provider lỗi nếu có triển khai → không làm rollback quyết định nghiệp vụ đã lưu.
+- Không được chỉ mở email support; app phải có hành động trong app.
+- Web deletion link/form phải hoạt động cho người dùng không thể đăng nhập.
+- Dữ liệu chống gian lận/audit có thể giữ theo `Data_Retention_Policy.md`, nhưng không được dùng cho marketing.
 
 ### Tiêu chí nghiệm thu
-- Bối cảnh quản trị viên xử lý báo cáo, khi quyết định được lưu, thì người tạo báo cáo nhận thông báo trong ứng dụng.
-- Bối cảnh hóa đơn được xác minh, khi worker cập nhật trạng thái VERIFIED, thì chủ đánh giá nhận thông báo kết quả.
-- Bối cảnh thông báo đã đọc, khi người dùng đánh dấu đã đọc, thì `readAt` được cập nhật và thông báo không còn nằm trong nhóm chưa đọc.
+- Bối cảnh người dùng đăng nhập, khi xác nhận xóa tài khoản, thì deletion request được tạo và token bị revoke.
+- Bối cảnh yêu cầu xóa hoàn tất, khi kiểm tra hồ sơ, thì dữ liệu cá nhân đã bị xóa/ẩn danh hóa theo policy.
 
 ---
 
-## GAME-001: EXP và cấp hạng cơ bản
+## SAFETY-001: Block user và an toàn UGC
 
 ### Mục tiêu
-Ghi nhận đóng góp của người dùng bằng EXP và cấp hạng mà không làm tăng động cơ spam hoặc bỏ qua chống gian lận.
+Bổ sung khả năng người dùng báo cáo/block user hoặc nội dung lạm dụng để đáp ứng yêu cầu UGC safety khi phát hành store.
 
 ### Tác nhân
-Người dùng đã đăng ký, người đánh giá đã xác minh, hệ thống, quản trị viên.
+Người dùng đã đăng ký, chủ quán, quản trị viên.
 
 ### Điều kiện tiên quyết
-- Người dùng tồn tại và không bị xóa.
-- Đánh giá đã được tạo thành công.
-- Kết quả xác minh hoặc kiểm duyệt đã được xác định nếu hành động phụ thuộc trạng thái review.
+- Review/user mục tiêu tồn tại.
+- Tác nhân đã đăng nhập nếu tạo report/block.
 
 ### Dữ liệu vào
-- ID người dùng.
-- ID đánh giá.
-- Trạng thái đánh giá.
-- Trạng thái xác minh.
-- Sự kiện nghiệp vụ tạo EXP hoặc thu hồi EXP.
+- `targetUserId` hoặc `reviewId`.
+- `reasonCode`, mô tả tùy chọn.
 
 ### Luồng chính
-1. Người dùng gửi đánh giá hợp lệ hoặc đánh giá được xác minh.
-2. Hệ thống nhận sự kiện review/verification/moderation.
-3. Hệ thống xác định hành động có đủ điều kiện cộng EXP hay không.
-4. Hệ thống cộng EXP theo bảng game hóa V1.
-5. Hệ thống tính lại cấp hạng nếu người dùng đạt ngưỡng mới.
-6. Hồ sơ người dùng hiển thị EXP và cấp hạng mới.
+1. Người dùng chọn report hoặc block từ review/user menu.
+2. Hệ thống validate quyền và chống spam report trùng.
+3. Report đi vào moderation queue; block có hiệu lực ngay trên feed/danh sách review.
+4. Admin xử lý report nếu cần.
 
 ### Quy tắc nghiệp vụ
-- Đánh giá tham khảo hợp lệ cộng ít EXP hơn đánh giá VERIFIED.
-- Đánh giá VERIFIED được cộng EXP cao hơn vì có bằng chứng xác minh.
-- EXP không được cộng cho hóa đơn trùng hash hoặc đánh giá bị REJECTED.
-- EXP có thể bị thu hồi nếu đánh giá bị HIDDEN hoặc REJECTED sau kiểm duyệt.
-- Cấp hạng không được dùng để bỏ qua chống gian lận.
-- EXP từ đánh giá tham khảo cần có giới hạn theo ngày để tránh spam.
-- Quy tắc EXP và ngưỡng cấp hạng chi tiết theo `05_Security_Algorithms/Gamification_Design.md`.
-
-### Luồng thay thế
-- Đánh giá đang PENDING_ADMIN_REVIEW → chưa cộng EXP verified cho tới khi có quyết định.
-- Đánh giá chuyển từ VERIFIED sang HIDDEN → hệ thống thu hồi hoặc vô hiệu hóa EXP theo quyết định kiểm duyệt.
-- Job cập nhật EXP lỗi → hệ thống retry và không được cộng trùng cho cùng sự kiện.
-- Người dùng bị hạn chế đánh giá → không được nhận EXP từ hành động vi phạm trong thời gian bị hạn chế.
+- Block không xóa nội dung khỏi hệ thống; chỉ ẩn/giảm hiển thị cho người block theo UX đã chốt.
+- Nội dung vi phạm chính sách vẫn cần moderation action riêng.
+- Hành động restrict/suspend user phải ghi audit log và reason.
 
 ### Tiêu chí nghiệm thu
-- Bối cảnh đánh giá được VERIFIED, khi job game hóa chạy, thì người dùng được cộng EXP verified đúng rule.
-- Bối cảnh đánh giá bị REJECTED do hash trùng, khi job game hóa chạy, thì người dùng không được cộng EXP.
-- Bối cảnh EXP đạt ngưỡng cấp hạng mới và điều kiện bổ sung đạt, khi hệ thống tính lại, thì `rankCode` của người dùng được cập nhật.
+- Bối cảnh user A block user B, khi A xem danh sách review, thì review của B bị ẩn hoặc hiển thị theo trạng thái “đã bị ẩn”.
+- Bối cảnh report hợp lệ, khi admin xử lý, thì trạng thái report/review/user cập nhật và audit log được tạo.

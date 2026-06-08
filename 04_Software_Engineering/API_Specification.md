@@ -3,21 +3,25 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Đặc tả API |
-| Phiên bản | v1.1.0 |
-| Trạng thái | Bản nháp |
+| Phiên bản | v1.4.0 |
+| Trạng thái | Đang rà soát |
 | Chủ sở hữu | Trưởng nhóm Backend / Mobile Lead |
+| Ngày cập nhật | 2026-06-07 |
 
 ---
 
 ## 1. Quy ước API
 
 - Base URL: `/api/v1`.
-- Định dạng: JSON, UTF-8; upload hóa đơn dùng multipart hoặc signed upload flow theo `OpenAPI_Guidelines.md`.
+- Định dạng: JSON, UTF-8; upload hóa đơn MVP dùng multipart theo `OpenAPI_Guidelines.md`. Signed upload là P1 khi cần scale.
 - Auth: Bearer access token + refresh/session token, trừ public endpoints.
 - IDs: UUID.
 - Thời gian: ISO-8601 kèm timezone.
-- API phải được chuẩn hóa thành OpenAPI 3.0/3.1 trước khi implementation production.
+- API P0 phải được chuẩn hóa trong `04_Software_Engineering/openapi.yaml` trước khi implementation production.
+- Endpoint P1/feature flag không được đưa vào sprint MVP nếu chưa có quyết định PO và traceability cập nhật.
 - Error code phải ổn định để mobile app mapping sang copy/localization.
+- Mapping trạng thái API/DB/UI phải theo `02_Business_Analysis/Status_Mapping.md`.
+- Mutation có rủi ro tạo trùng khi mobile retry phải dùng `Idempotency-Key`; bắt buộc cho `POST /receipts`, khuyến nghị cho `POST /reviews`. Thiết kế chi tiết xem `Idempotency_and_Retry_Design.md`.
 - Status code tối thiểu theo `OpenAPI_Guidelines.md`: 200, 201, 202, 400, 401, 403, 404, 409, 413, 415, 422, 429, 500, 503.
 - Phản hồi lỗi:
 
@@ -134,6 +138,39 @@ Yêu cầu:
 }
 ```
 
+### POST /users/me/deletion-request
+
+Auth: người dùng hiện tại. Endpoint P0 cho public beta/store release.
+
+Yêu cầu:
+
+```json
+{
+  "confirmationText": "XÓA TÀI KHOẢN",
+  "reason": "Không còn nhu cầu sử dụng"
+}
+```
+
+Phản hồi: `202 Accepted`
+
+```json
+{
+  "deletionRequestId": "uuid",
+  "status": "REQUESTED",
+  "scheduledDeletionAt": "2026-06-14T12:30:00+07:00"
+}
+```
+
+Ghi chú: backend phải revoke session theo chính sách triển khai, xóa/ẩn danh hóa PII theo `Data_Retention_Policy.md`, và chỉ giữ audit/fraud/legal record tối thiểu khi có cơ sở. Nếu đã có request mở, API trả `409 DELETION_REQUEST_ALREADY_EXISTS`.
+
+### GET /users/me/deletion-request
+
+Trả trạng thái yêu cầu xóa tài khoản đang mở của người dùng hiện tại. Nếu không có request, trả `404 DELETION_REQUEST_NOT_FOUND`.
+
+### POST /users/me/deletion-request/cancel
+
+Tùy chọn nếu sản phẩm áp dụng grace period. Chỉ cho phép hủy khi trạng thái còn `REQUESTED` và chưa chạy job xóa dữ liệu.
+
 ---
 
 ## 4. Quán
@@ -197,6 +234,14 @@ Phản hồi phải phân biệt rõ review `VERIFIED` và `REFERENCE_ONLY` đ�
 
 ### POST /reviews
 
+Auth: `USER`.
+
+Header khuyến nghị:
+
+```text
+Idempotency-Key: uuid-v4
+```
+
 Yêu cầu:
 
 ```json
@@ -227,13 +272,42 @@ Response gồm điểm đánh giá, bình luận, trạng thái, trạng thái x
 
 ### PATCH /reviews/{reviewId}
 
-Chỉ cho phép khi đánh giá ở DRAFT/SUBMITTED và chưa chốt xác minh, tùy chính sách.
+Chỉ cho phép khi đánh giá ở `DRAFT` hoặc `SUBMITTED` và chưa có receipt verification đã chốt. Nếu review đã `VERIFIED`, `REFERENCE_ONLY`, `REJECTED`, `HIDDEN` hoặc `DELETED`, API trả `REVIEW_NOT_EDITABLE`.
+
+### POST /reviews/{reviewId}/skip-verification
+
+Cho phép người dùng bỏ qua upload hóa đơn và chuyển review sang `REFERENCE_ONLY`.
+
+Auth: chủ sở hữu review.
+
+Yêu cầu:
+
+```json
+{
+  "reason": "USER_SKIPPED_RECEIPT"
+}
+```
+
+Phản hồi:
+
+```json
+{
+  "reviewId": "uuid",
+  "status": "REFERENCE_ONLY",
+  "verificationStatus": "SKIPPED",
+  "trustLabel": "REFERENCE_ONLY"
+}
+```
+
+Ghi chú: backend cũng chạy job chuyển review `SUBMITTED` không có receipt sau 24 giờ sang `REFERENCE_ONLY`.
 
 ### DELETE /reviews/{reviewId}
 
 Xóa mềm theo chính sách của chủ sở hữu hoặc quản trị viên.
 
 ### POST /reviews/{reviewId}/votes
+
+Mức ưu tiên: **P1**, không thuộc MVP nếu chưa bật feature flag.
 
 Yêu cầu:
 
@@ -271,7 +345,15 @@ Phản hồi:
 
 ### POST /receipts
 
+Auth: chủ sở hữu review.
+
 Content-Type: `multipart/form-data`
+
+Header bắt buộc:
+
+```text
+Idempotency-Key: uuid-v4
+```
 
 Fields:
 
@@ -295,7 +377,12 @@ Phản hồi: `202 Accepted`
 }
 ```
 
-Ghi chú: nếu mobile retry upload, backend nên hỗ trợ idempotency key hoặc upload intent để tránh tạo bản ghi trùng.
+Ghi chú:
+
+- Nếu mobile retry upload với cùng `Idempotency-Key`, backend trả lại receipt verification đã tạo thay vì tạo bản ghi mới.
+- Nếu cùng `Idempotency-Key` nhưng payload khác, backend trả `409 IDEMPOTENCY_CONFLICT`.
+- Backend validate file type/size dù mobile đã kiểm tra sơ bộ.
+- Hash duplicate phải tạo fraud flag `DUPLICATE_RECEIPT_HASH` và cập nhật trạng thái theo `State_Machines.md`.
 
 ### GET /receipts/{receiptVerificationId}
 
@@ -341,11 +428,41 @@ Phản hồi:
 }
 ```
 
+### POST /users/{userId}/block
+
+Auth: người dùng hiện tại. Dùng để hạn chế tương tác từ người dùng lạm dụng trong phạm vi TrustBite.
+
+Yêu cầu:
+
+```json
+{
+  "reasonCode": "ABUSIVE_LANGUAGE",
+  "sourceReviewId": "uuid"
+}
+```
+
+Phản hồi:
+
+```json
+{
+  "blockedUserId": "uuid",
+  "blockedAt": "2026-06-07T12:30:00+07:00"
+}
+```
+
+Lỗi: `400 CANNOT_BLOCK_SELF`, `409 USER_ALREADY_BLOCKED`.
+
+### DELETE /users/{userId}/block
+
+Bỏ chặn người dùng. Phản hồi `{ "success": true }`.
+
 ---
 
 ## 8. Chủ quán
 
 ### POST /merchant/claims
+
+Mức ưu tiên: MVP chỉ dùng khi bật claim tối thiểu/manual beta; merchant portal đầy đủ là **P1/V1.1**.
 
 Yêu cầu:
 
@@ -368,9 +485,11 @@ Phản hồi:
 
 ### PATCH /merchant/restaurants/{restaurantId}
 
-Chỉ cho phép với claim đã được duyệt.
+Mức ưu tiên: **P1/V1.1**. Chỉ cho phép với claim đã được duyệt.
 
 ### POST /merchant/reviews/{reviewId}/reply
+
+Mức ưu tiên: **P1/V1.1**, không thuộc MVP P0.
 
 Yêu cầu:
 
@@ -392,7 +511,11 @@ Tham số truy vấn:
 status, minRiskScore, maxRiskScore, page, pageSize
 ```
 
-### POST /admin/receipt-verifications/{id}/decision
+### POST /admin/receipt-verifications/{receiptVerificationId}/decision
+
+Auth: `ADMIN` hoặc `SUPER_ADMIN`.
+
+Decision hợp lệ: `APPROVE_VERIFIED`, `MARK_REFERENCE_ONLY`, `REJECT`, `REQUEST_MORE_REVIEW`.
 
 Yêu cầu:
 
@@ -402,6 +525,8 @@ Yêu cầu:
   "reason": "Receipt name and timestamp match restaurant records."
 }
 ```
+
+`reason` bắt buộc. Thiếu reason trả `422 ADMIN_REASON_REQUIRED`.
 
 Phản hồi:
 
@@ -416,7 +541,11 @@ Phản hồi:
 
 ### GET /admin/moderation/reports
 
-### POST /admin/moderation/reports/{id}/decision
+### POST /admin/moderation/reports/{reportId}/decision
+
+Auth: `ADMIN` hoặc `SUPER_ADMIN`.
+
+Action hợp lệ: `NO_ACTION`, `HIDE_REVIEW`, `DELETE_REVIEW`, `RESTRICT_USER_REVIEW`, `CLOSE_REPORT`.
 
 Yêu cầu:
 
@@ -427,7 +556,11 @@ Yêu cầu:
 }
 ```
 
+`reason` bắt buộc với mọi action trừ `CLOSE_REPORT` kỹ thuật sau khi đã có action trước đó.
+
 ### POST /admin/restaurant-claims/{id}/decision
+
+Auth: `ADMIN` hoặc `SUPER_ADMIN`.
 
 Yêu cầu:
 
@@ -438,11 +571,15 @@ Yêu cầu:
 }
 ```
 
+MVP ghi nhận claim/ownership tối thiểu để kiểm chứng vận hành chủ quán; merchant portal đầy đủ vẫn thuộc P1/V1.1.
+
 ---
 
 ## 10. Thông báo
 
 ### GET /notifications
+
+Mức ưu tiên: **P1/feature flag**. MVP dùng polling/refetch `GET /receipts/{receiptVerificationId}` và `GET /reviews/{reviewId}`.
 
 Phản hồi:
 
@@ -461,6 +598,8 @@ Phản hồi:
 ```
 
 ### PATCH /notifications/{id}/read
+
+Mức ưu tiên: **P1/feature flag**.
 
 Phản hồi:
 

@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Design system định hướng |
-| Phiên bản | v1.0.0 |
+| Phiên bản | v1.1.0 |
 | Trạng thái | Bản nháp |
 | Chủ sở hữu | UX Lead / Product Manager |
 | Ngày cập nhật | 2026-06-07 |
@@ -21,7 +21,7 @@ Tài liệu này chỉ xác định **nguyên tắc thiết kế sản phẩm v�
 - motion style,
 - visual identity.
 
-Các quyết định visual sẽ được cập nhật sau khi có prototype, kiểm thử người dùng và phê duyệt thương hiệu.
+Các quyết định visual sẽ được cập nhật sau khi có prototype, kiểm thử người dùng và phê duyệt thương hiệu. Nội dung hiển thị, thông báo lỗi, empty state, privacy copy và admin decision copy phải tuân thủ `UX_Writing_Guidelines.md`.
 
 ---
 
@@ -102,3 +102,4 @@ Khi chốt màu, mỗi role phải có token cho light/dark nếu app hỗ trợ
 - Người dùng có tin rằng ảnh hóa đơn được bảo vệ riêng tư không?
 - Admin có xử lý case nhanh hơn khi thấy risk score, OCR, GPS và audit cùng một chỗ không?
 - Badge/trạng thái có rõ với người dùng không phân biệt màu không?
+- Nội dung lỗi và quyền riêng tư có nhất quán với `UX_Writing_Guidelines.md` không?

@@ -3,7 +3,7 @@
 | Thông tin tài liệu | Chi tiết |
 |---|---|
 | Loại tài liệu | Chính sách quyền riêng tư |
-| Phiên bản | v2.1.0 |
+| Phiên bản | v2.4.0 |
 | Trạng thái | Đang rà soát |
 | Chủ sở hữu | Pháp lý / Bảo mật |
 | Ngày cập nhật | 2026-06-07 |
@@ -76,3 +76,69 @@ Người dùng có quyền:
 - khiếu nại quyết định kiểm duyệt/xác minh nếu có quy trình hỗ trợ.
 
 Một số bản ghi audit hoặc bảo mật có thể được giữ lại theo chính sách lưu giữ dữ liệu để chống gian lận hoặc đáp ứng nghĩa vụ pháp lý.
+
+### 7.1. Luồng xóa tài khoản và dữ liệu
+
+- Mobile app phải có mục **Xóa tài khoản** trong Account Settings cho mọi người dùng đã đăng nhập.
+- TrustBite phải có web link/form công khai để người dùng yêu cầu xóa tài khoản/dữ liệu ngoài app.
+- Sau khi người dùng xác nhận, hệ thống tạo `account_deletion_request`, revoke session theo quy trình, và xóa hoặc ẩn danh hóa PII theo `Data_Retention_Policy.md`.
+- Nội dung review có thể bị xóa, ẩn hoặc ẩn danh hóa theo lựa chọn sản phẩm/pháp lý; dữ liệu chống gian lận, audit và nghĩa vụ pháp lý chỉ giữ tối thiểu, có thời hạn và giới hạn truy cập.
+- CS/Ops không được yêu cầu người dùng gửi OTP, token, hóa đơn gốc hoặc giấy tờ nhạy cảm qua kênh không an toàn để xác minh yêu cầu xóa.
+
+---
+
+## 8. Consent copy tối thiểu cho MVP
+
+Các nội dung dưới đây là bản chuẩn nội bộ để UX/mobile dùng khi viết copy. Trước public release cần Legal rà soát ngôn ngữ cuối cùng.
+
+### 8.1. Hóa đơn
+
+```text
+TrustBite dùng ảnh hóa đơn để kiểm tra đánh giá có dựa trên trải nghiệm thật hay không. Ảnh gốc được lưu riêng tư và không hiển thị công khai trực tiếp. Nếu cần hiển thị bằng chứng, hệ thống chỉ dùng bản đã che thông tin nhạy cảm.
+```
+
+### 8.2. GPS tùy chọn
+
+```text
+Bạn có thể chia sẻ vị trí hiện tại để tăng tín hiệu xác minh. Đây là lựa chọn tùy ý. Nếu bạn từ chối, đánh giá/hóa đơn vẫn được xử lý bằng các tín hiệu khác.
+```
+
+### 8.3. OCR provider
+
+```text
+TrustBite có thể dùng nhà cung cấp OCR để đọc thông tin cần thiết trên hóa đơn, như tên quán và thời gian. Dữ liệu này chỉ dùng cho xác minh và chống gian lận theo chính sách lưu giữ dữ liệu.
+```
+
+### 8.4. Xóa dữ liệu/tài khoản
+
+```text
+Bạn có thể yêu cầu xóa tài khoản hoặc dữ liệu cá nhân. Một số bản ghi audit, bảo mật hoặc chống gian lận có thể được giữ lại trong thời gian giới hạn nếu cần cho nghĩa vụ pháp lý hoặc bảo vệ hệ thống.
+```
+
+---
+
+## 9. Yêu cầu trước public beta
+
+- Có bản Privacy Policy công khai, dễ đọc cho người dùng cuối.
+- Có Terms of Service hoặc Điều khoản sử dụng.
+- Có đường dẫn/form yêu cầu xóa tài khoản và dữ liệu.
+- OCR/SMS/analytics/crash provider phải được rà soát vendor/privacy.
+- Store metadata phải khai báo số điện thoại, ảnh hóa đơn, GPS tùy chọn, analytics/crash nếu dùng.
+- Mobile/admin không log OTP, token, GPS gốc, OCR text đầy đủ hoặc số điện thoại đầy đủ.
+
+
+## 10. Mapping khai báo store
+
+Trước khi submit App Store/Google Play, Release Manager phải đối chiếu chính sách này với `Store_Privacy_Data_Safety_Mapping.md` và hành vi thực tế của app/SDK.
+
+Các nhóm dữ liệu tối thiểu cần rà soát:
+
+- Contact info: số điện thoại OTP.
+- User content: review, media review nếu bật.
+- Photos/files: ảnh hóa đơn và bản đã che dữ liệu.
+- Location: GPS một lần, tùy chọn, không tracking liên tục.
+- Identifiers/session: user ID, session ID, push token hash nếu bật.
+- Diagnostics/analytics: crash log, performance, event analytics nếu tích hợp SDK.
+- Security/fraud signals: IP hash, device fingerprint hash, fraud flags.
+
+Không được khai báo “không thu thập dữ liệu” nếu bất kỳ nhóm trên đang được app hoặc SDK bên thứ ba xử lý.
