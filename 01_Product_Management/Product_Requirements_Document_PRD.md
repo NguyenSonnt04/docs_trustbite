@@ -81,15 +81,16 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 
 - Tác nhân: Khách chưa đăng nhập, Người dùng đã đăng ký
 - Mức ưu tiên: P0
-- Mục tiêu: Cho phép người dùng xác thực bằng số điện thoại.
-- Dữ liệu vào: số điện thoại, mã OTP.
+- Mục tiêu: Cho phép người dùng xác thực bằng số điện thoại hoặc tài khoản liên kết (dự phòng).
+- Dữ liệu vào: số điện thoại, mã OTP, hoặc token liên kết xã hội (Google/Apple).
 - Dữ liệu ra: session/token đã xác thực.
 - Quy tắc nghiệp vụ:
   - OTP gồm 6 chữ số.
   - OTP hết hạn sau 120 giây.
-  - Tối đa 3 lần gửi OTP trong 10 phút cho một số điện thoại.
-  - Tối đa 5 lần nhập sai OTP trước khi khóa tạm thời.
-- Điều kiện lỗi: OTP sai, OTP hết hạn, số điện thoại không hợp lệ, vượt rate limit.
+  - Tối đa 3 lần gửi OTP trong 10 phút cho một số điện thoại (Lưu trạng thái trên Redis).
+  - Tối đa 5 lần nhập sai OTP trước khi khóa tạm thời (Khóa 15 phút cho lần đầu, khóa 24 giờ cho các lần tiếp theo trong ngày).
+  - Hỗ trợ đăng nhập Google/Apple Sign-In làm phương án dự phòng khi SMS OTP thất bại hoặc chậm trễ.
+- Điều kiện lỗi: OTP sai, OTP hết hạn, số điện thoại không hợp lệ, tài khoản bị khóa tạm thời, vượt rate limit.
 - Tiêu chí nghiệm thu:
   - Bối cảnh người dùng nhập OTP đúng còn hạn, khi xác thực, thì người dùng đăng nhập thành công.
   - Bối cảnh người dùng yêu cầu OTP quá 3 lần/10 phút, khi gửi tiếp, thì hệ thống từ chối và trả thông báo rate limit.
@@ -130,7 +131,7 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 - Dữ liệu ra: reviewId, trạng thái đánh giá, bước tiếp theo.
 - Quy tắc nghiệp vụ:
   - Điểm mỗi tiêu chí từ 1 đến 5.
-  - Bình luận tối thiểu 50 ký tự.
+  - Bình luận tối thiểu 30 ký tự cho đánh giá thông thường (Reference) và tối thiểu 50 ký tự nếu muốn tải hóa đơn xác minh (Verified).
   - Quán phải ở trạng thái ACTIVE.
   - Người dùng bị khóa quyền đánh giá không được gửi đánh giá.
   - Chủ quán không được đánh giá quán mình sở hữu/claim.
@@ -157,7 +158,9 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - Dung lượng tối đa: 10MB.
   - Hóa đơn nên nằm trong vòng 48 giờ so với thời điểm đánh giá.
   - Một hóa đơn không được dùng để verify nhiều đánh giá.
-  - Hash trùng là tín hiệu reject mạnh.
+  - Hệ thống chặn trùng hóa đơn bằng 2 lớp:
+    1. SHA-256 hash của file ảnh gốc.
+    2. Khóa trùng dữ liệu (Composite Transaction Hash) tạo từ: Tên quán chuẩn hóa + Ngày giờ giao dịch + Số hóa đơn/Transaction ID + Tổng tiền. Nếu trùng một trong hai lớp, hóa đơn bị tự động từ chối và cờ gian lận được ghi nhận.
   - OCR tên quán khớp 80-100% là rủi ro thấp; 60-79% cần quản trị viên rà soát; dưới 60% rủi ro cao.
 - Dữ liệu ra:
   - VERIFIED.
@@ -179,8 +182,10 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 - Quy tắc nghiệp vụ:
   - GPS không bật không làm reject tự động.
   - GPS trong 200m là rủi ro thấp.
-  - GPS 200-500m là rủi ro trung bình.
-  - GPS >500m là rủi ro cao.
+  - GPS lệch >200m được xử lý giảm hình phạt rủi ro theo thời gian gửi review:
+    - Nếu gửi tại quán (trong vòng 1 giờ từ khi ăn): GPS >200m là rủi ro cao (+40 điểm).
+    - Nếu viết review tại nhà/sau đó (từ 1-48 giờ): Giảm hình phạt định vị (chỉ cộng +10 điểm hoặc +0 điểm nếu thời gian giao dịch trên hóa đơn và ảnh EXIF khớp chính xác và OCR tên quán khớp >80%).
+  - Ưu tiên đọc dữ liệu GPS từ metadata ảnh (EXIF) nếu được cấp quyền thư viện ảnh, trước khi lấy GPS thiết bị thực tế lúc upload.
 - Tiêu chí nghiệm thu:
   - Bối cảnh người dùng không cấp GPS, khi tải hóa đơn hợp lệ, thì hệ thống vẫn xử lý OCR/hash và cộng điểm rủi ro theo rule.
 
@@ -195,6 +200,7 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - Đánh giá đã xác minh có trọng số cao hơn đánh giá tham khảo.
   - Đánh giá bị HIDDEN/DELETED không được tính điểm.
   - Trọng số ban đầu phải đơn giản và có thể điều chỉnh sau beta.
+  - Việc tính toán điểm tin cậy quán được xử lý bất đồng bộ (asynchronous) qua Redis Queue để tránh làm chậm hệ thống.
 - Tiêu chí nghiệm thu:
   - Bối cảnh đánh giá VERIFIED mới được tạo, khi job cập nhật điểm chạy, thì điểm tin cậy của quán được tính lại.
 
@@ -228,7 +234,7 @@ Mỗi tính năng sử dụng định dạng chuẩn:
 ### MERCH-001: Chủ quán xác nhận quyền quản lý quán
 
 - Tác nhân: Chủ quán
-- Mức ưu tiên: P1
+- Mức ưu tiên: P1 (Chuyển sang phạm vi V1.1, không triển khai ở MVP)
 - Mục tiêu: Cho phép chủ quán yêu cầu xác minh quyền sở hữu.
 - Dữ liệu vào: restaurantId, giấy tờ kinh doanh, thông tin liên hệ.
 - Dữ liệu ra: claimId, trạng thái claim.
@@ -261,6 +267,7 @@ Mỗi tính năng sử dụng định dạng chuẩn:
   - Đánh giá reference cộng ít EXP hơn verified đánh giá.
   - EXP từ đánh giá bị rejected/hidden có thể bị thu hồi.
   - Rank không được dùng để bỏ qua chống gian lận.
+  - Hệ thống xử lý cập nhật EXP và thăng/hạ rank bất đồng bộ (async). Mọi tác động recalculate trọng số của review do đổi rank người dùng sẽ được xử lý trong background job.
 - Tiêu chí nghiệm thu:
   - Bối cảnh đánh giá verified thành công, khi hệ thống cập nhật game hóa, thì người dùng được cộng EXP theo rule.
 

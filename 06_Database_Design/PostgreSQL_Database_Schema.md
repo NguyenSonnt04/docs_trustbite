@@ -196,6 +196,7 @@ CREATE TABLE receipt_verifications (
   restaurant_id UUID NOT NULL REFERENCES restaurants(id),
   file_url TEXT NOT NULL,
   file_hash_sha256 CHAR(64) NOT NULL,
+  transaction_unique_hash CHAR(64),
   status VARCHAR(40) NOT NULL DEFAULT 'UPLOADED',
   ocr_text TEXT,
   ocr_restaurant_name VARCHAR(200),
@@ -479,6 +480,7 @@ CREATE INDEX idx_reviews_restaurant_status ON reviews(restaurant_id, status);
 CREATE INDEX idx_reviews_public_trust ON reviews(restaurant_id, public_visibility, trust_weight_bucket);
 CREATE INDEX idx_reviews_user_restaurant ON reviews(user_id, restaurant_id);
 CREATE UNIQUE INDEX idx_receipts_hash_unique ON receipt_verifications(file_hash_sha256);
+CREATE UNIQUE INDEX idx_receipts_transaction_unique ON receipt_verifications(transaction_unique_hash) WHERE transaction_unique_hash IS NOT NULL;
 CREATE INDEX idx_receipts_review ON receipt_verifications(review_id);
 CREATE INDEX idx_receipts_status ON receipt_verifications(status);
 CREATE INDEX idx_review_replies_review ON review_replies(review_id);

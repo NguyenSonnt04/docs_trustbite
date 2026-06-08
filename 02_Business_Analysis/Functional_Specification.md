@@ -2,7 +2,7 @@
 
 | Thông tin tài liệu | Chi tiết |
 |---|---|
-| Phiên bản | v1.1.0 |
+| Phiên bản | v1.2.0 |
 | Trạng thái | Bản nháp |
 | Chủ sở hữu | Chuyên viên phân tích nghiệp vụ |
 
@@ -201,6 +201,163 @@ Người dùng đã đăng ký, hệ thống, quản trị viên.
 ### Tiêu chí nghiệm thu
 - Bối cảnh hóa đơn hợp lệ và rủi ro thấp, khi OCR hoàn tất, thì đánh giá chuyển VERIFIED.
 - Bối cảnh hash trùng, khi tải hóa đơn, thì hóa đơn chuyển REJECTED.
+
+---
+
+## GPS-001: Xác minh GPS tùy chọn
+
+### Mục tiêu
+Ghi nhận vị trí người dùng nếu được cho phép và dùng khoảng cách tới quán như tín hiệu hỗ trợ xác minh.
+
+### Tác nhân
+Người dùng đã đăng ký, hệ thống.
+
+### Điều kiện tiên quyết
+- Người dùng đã đăng nhập.
+- Đánh giá hoặc hóa đơn đang trong luồng xác minh.
+- Quán có tọa độ hợp lệ để tính khoảng cách.
+- Người dùng chủ động cấp quyền GPS tại thời điểm gửi đánh giá hoặc tải hóa đơn.
+
+### Dữ liệu vào
+- ID đánh giá hoặc ID xác minh hóa đơn.
+- Vĩ độ.
+- Kinh độ.
+- Độ chính xác GPS.
+- Thời điểm ghi nhận vị trí.
+
+### Luồng chính
+1. Người dùng được hỏi quyền GPS theo ngữ cảnh khi gửi đánh giá hoặc tải hóa đơn.
+2. Người dùng đồng ý chia sẻ vị trí.
+3. Mobile app gửi tọa độ, độ chính xác và thời điểm ghi nhận.
+4. Hệ thống kiểm tra tọa độ, độ chính xác và thời gian ghi nhận.
+5. Hệ thống tính khoảng cách giữa vị trí người dùng và quán bằng Haversine.
+6. Hệ thống ghi nhận `gpsDistanceMeters` và tín hiệu rủi ro GPS.
+7. Hệ thống chuyển tín hiệu GPS vào điểm rủi ro tổng của xác minh hóa đơn.
+
+### Quy tắc nghiệp vụ
+- GPS là tùy chọn và không được dùng làm điều kiện bắt buộc để gửi đánh giá.
+- Người dùng không cấp GPS không bị từ chối tự động.
+- GPS trong 200m không tăng rủi ro.
+- GPS 200-500m tăng rủi ro mức trung bình.
+- GPS lớn hơn 500m tăng rủi ro mức cao.
+- GPS accuracy lớn hơn 100m chỉ là tín hiệu rủi ro, không reject cứng.
+- Mobile app không được tự quyết định kết quả xác minh dựa trên GPS.
+- Dữ liệu GPS gốc chỉ dùng cho xác minh/audit và tuân thủ chính sách lưu giữ dữ liệu.
+
+### Luồng thay thế
+- Người dùng từ chối GPS → hệ thống tiếp tục OCR/hash và cộng rủi ro theo rule thiếu GPS.
+- GPS permission bị hệ điều hành chặn → mobile hiển thị trạng thái không có GPS và cho phép tiếp tục.
+- Tọa độ không hợp lệ → hệ thống bỏ qua tín hiệu GPS và ghi lý do.
+- Quán thiếu tọa độ → hệ thống không tính khoảng cách và không reject tự động.
+- Độ chính xác GPS thấp → hệ thống tăng rủi ro nhưng vẫn xử lý các tín hiệu khác.
+
+### Tiêu chí nghiệm thu
+- Bối cảnh người dùng cấp GPS trong 200m, khi tải hóa đơn hợp lệ, thì tín hiệu GPS không làm tăng điểm rủi ro.
+- Bối cảnh người dùng từ chối GPS, khi tải hóa đơn hợp lệ, thì hệ thống vẫn xử lý OCR/hash và không tự động từ chối.
+- Bối cảnh GPS xa hơn 500m, khi tính rủi ro, thì hệ thống tăng điểm rủi ro và có thể chuyển duyệt thủ công hoặc đánh dấu tham khảo theo tổng điểm.
+
+---
+
+## TRUST-001: Tính điểm tin cậy quán
+
+### Mục tiêu
+Tính và hiển thị điểm tin cậy của quán dựa trên đánh giá có trọng số, ưu tiên đánh giá đã xác minh.
+
+### Tác nhân
+Hệ thống, quản trị viên.
+
+### Điều kiện tiên quyết
+- Quán tồn tại.
+- Có ít nhất một đánh giá hợp lệ hoặc hệ thống có rule hiển thị trạng thái chưa đủ dữ liệu.
+- Trạng thái đánh giá đã được đồng bộ theo state machine.
+
+### Dữ liệu vào
+- ID quán.
+- Điểm trung bình của từng đánh giá.
+- Trạng thái đánh giá.
+- Trạng thái xác minh.
+- Cấp hạng người dùng tại thời điểm tính điểm.
+
+### Luồng chính
+1. Đánh giá mới được tạo, xác minh, ẩn, từ chối hoặc xóa mềm.
+2. Hệ thống phát sinh job tính lại điểm cho quán liên quan.
+3. Hệ thống lấy các đánh giá đủ điều kiện tính điểm.
+4. Hệ thống gán trọng số theo trạng thái xác minh và cấp hạng người dùng.
+5. Hệ thống loại trừ đánh giá HIDDEN, REJECTED và DELETED.
+6. Hệ thống tính điểm tin cậy và phân rã số lượng đánh giá VERIFIED/REFERENCE_ONLY.
+7. Hệ thống cập nhật điểm hiển thị trên danh sách và chi tiết quán.
+
+### Quy tắc nghiệp vụ
+- Đánh giá VERIFIED có trọng số cao hơn đánh giá REFERENCE_ONLY.
+- Đánh giá REFERENCE_ONLY vẫn có thể được hiển thị nhưng chỉ tính trọng số thấp.
+- Đánh giá HIDDEN, REJECTED và DELETED không được tính điểm tin cậy.
+- Cấp hạng người dùng chỉ ảnh hưởng trọng số nếu đánh giá là VERIFIED.
+- Cấp hạng không được dùng để bỏ qua chống gian lận.
+- Nếu quán chưa có đủ dữ liệu, hệ thống hiển thị trạng thái chưa đủ đánh giá thay vì điểm gây hiểu nhầm.
+- Công thức và trọng số chi tiết theo `05_Security_Algorithms/Anti_Fraud_Specification.md`.
+
+### Luồng thay thế
+- Job tính điểm lỗi → hệ thống retry và giữ điểm gần nhất kèm log vận hành.
+- Đánh giá bị ẩn sau khi đã tính điểm → hệ thống phải tính lại và loại trừ đánh giá đó.
+- Người dùng bị hạ cấp hoặc EXP bị thu hồi → điểm có thể được tính lại theo policy nếu cấp hạng là input trọng số hiện hành.
+- Không có đánh giá hợp lệ → điểm tin cậy để trống hoặc hiển thị trạng thái chưa đủ dữ liệu.
+
+### Tiêu chí nghiệm thu
+- Bối cảnh đánh giá VERIFIED mới được tạo, khi job tính điểm chạy, thì điểm tin cậy của quán được cập nhật.
+- Bối cảnh đánh giá HIDDEN, khi job tính điểm chạy lại, thì đánh giá đó không còn ảnh hưởng tới điểm tin cậy.
+- Bối cảnh quán chỉ có đánh giá REFERENCE_ONLY, khi hiển thị, thì hệ thống phân biệt rõ điểm/tín hiệu tham khảo với đánh giá đã xác minh.
+
+---
+
+## MERCH-001: Chủ quán xác nhận quyền quản lý quán
+
+### Mục tiêu
+Cho phép chủ quán gửi yêu cầu xác nhận quyền quản lý quán để cập nhật thông tin và phản hồi đánh giá trong phạm vi được duyệt.
+
+### Tác nhân
+Chủ quán, quản trị viên, siêu quản trị.
+
+### Điều kiện tiên quyết
+- Chủ quán đã đăng nhập.
+- Quán tồn tại trong hệ thống.
+- Chủ quán cung cấp thông tin liên hệ và bằng chứng quyền sở hữu/quản lý.
+- Không có claim đang mở trùng cho cùng chủ quán và quán.
+
+### Dữ liệu vào
+- ID quán.
+- Tên pháp lý hoặc tên kinh doanh.
+- Thông tin liên hệ.
+- Bằng chứng quyền sở hữu/quản lý.
+- Ghi chú bổ sung nếu có.
+
+### Luồng chính
+1. Chủ quán mở luồng claim quán.
+2. Chủ quán chọn quán và nhập thông tin xác minh.
+3. Hệ thống kiểm tra dữ liệu bắt buộc và claim trùng.
+4. Hệ thống tạo claim ở trạng thái SUBMITTED hoặc PENDING_ADMIN_REVIEW.
+5. Quản trị viên mở hàng đợi claim.
+6. Quản trị viên xem bằng chứng và đưa ra quyết định kèm lý do.
+7. Nếu được duyệt, hệ thống gán quyền quản lý quán cho chủ quán.
+8. Hệ thống ghi audit log cho quyết định.
+
+### Quy tắc nghiệp vụ
+- Claim phải được quản trị viên duyệt trước khi chủ quán được chỉnh thông tin quán.
+- Chủ quán chỉ chỉnh được quán có claim APPROVED.
+- Chủ quán không được xóa đánh giá của người dùng.
+- Chủ quán không được đánh giá quán do mình sở hữu hoặc đang có claim đã duyệt.
+- Claim trùng hoặc tranh chấp ownership phải chuyển quản trị viên xử lý.
+- Merchant portal chi tiết thuộc P1/V1.1; MVP có thể chỉ cần luồng claim tối thiểu nếu cần kiểm chứng giả thuyết chủ quán.
+
+### Luồng thay thế
+- Thiếu giấy tờ hoặc thông tin liên hệ → hệ thống trả lỗi validate.
+- Claim trùng đang mở → hệ thống từ chối hoặc gộp vào case tranh chấp theo policy.
+- Quản trị viên từ chối claim → claim chuyển REJECTED và ghi lý do.
+- Chủ quán cố chỉnh quán chưa được duyệt → hệ thống trả lỗi thiếu quyền.
+
+### Tiêu chí nghiệm thu
+- Bối cảnh chủ quán gửi claim đủ thông tin, khi hệ thống lưu thành công, thì claim xuất hiện trong hàng đợi quản trị.
+- Bối cảnh quản trị viên duyệt claim kèm lý do, khi quyết định được lưu, thì chủ quán có quyền quản lý quán đó và audit log được tạo.
+- Bối cảnh chủ quán chưa có claim APPROVED, khi cập nhật thông tin quán, thì hệ thống từ chối do thiếu quyền.
 
 ---
 
